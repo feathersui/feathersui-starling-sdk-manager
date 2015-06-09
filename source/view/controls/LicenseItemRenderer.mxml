@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<f:LayoutGroupListItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:f="library://ns.feathersui.com/mxml" xmlns:utils="utils.*">
+	
+	<fx:Declarations>
+		<utils:TapToSelect target="{this}" tapToDeselect="true"/>
+	</fx:Declarations>
+	
+	<f:layout>
+		<f:HorizontalLayout gap="10" padding="6" verticalAlign="middle"/>
+	</f:layout>
+	
+	<f:Check id="check" styleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_ITEM_RENDERER_CHECK}"
+		isSelected="{isSelected}"
+		label="{LicenseItem(data).name}">
+		<f:layoutData>
+			<f:HorizontalLayoutData percentWidth="100"/>
+		</f:layoutData>
+	</f:Check>
+		
+	<f:Button id="viewLicenseButton" styleName="{Button.ALTERNATE_STYLE_NAME_QUIET_BUTTON}"
+		label="View License"
+		triggered="viewLicenseButton_triggeredHandler(event)"/>
+		
+	<fx:Script><![CDATA[
+		import model.LicenseItem;
+
+		import starling.display.DisplayObject;
+		import starling.events.Event;
+
+		import utils.CustomStyleNames;
+
+		override public function hitTest(localPoint:Point, forTouch:Boolean = false):DisplayObject
+		{
+			var result:DisplayObject = super.hitTest(localPoint, forTouch);
+			if(result === this.viewLicenseButton)
+			{
+				return result;
+			}
+
+			//return the check for everything outside of the button
+			return this._hitArea.containsPoint(localPoint) ? this.check : null;
+		}
+
+		protected function viewLicenseButton_triggeredHandler(event:starling.events.Event):void
+		{
+			var url:String = LicenseItem(data).url;
+			navigateToURL(new URLRequest(url), "_blank");
+		}
+		]]></fx:Script>
+</f:LayoutGroupListItemRenderer>

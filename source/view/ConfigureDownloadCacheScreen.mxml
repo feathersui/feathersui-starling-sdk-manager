@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<f:Screen xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:f="library://ns.feathersui.com/mxml">
+	
+	<fx:Metadata>
+		[Event(name="complete", type="starling.events.Event")]
+	</fx:Metadata>
+	
+	<f:layout>
+		<f:AnchorLayout/>
+	</f:layout>
+	<f:LayoutGroup>
+		<f:layout>
+			<f:VerticalLayout gap="10" padding="10"
+				horizontalAlign="left" verticalAlign="middle"/>
+		</f:layout>
+		<f:layoutData>
+			<f:AnchorLayoutData top="0" right="0" bottom="0" left="0"
+				bottomAnchorDisplayObject="{footer}"/>
+		</f:layoutData>
+		<f:Label styleName="{Label.ALTERNATE_STYLE_NAME_HEADING}"
+			wordWrap="true"
+			text="Configure download cache">
+			<f:layoutData>
+				<f:VerticalLayoutData percentWidth="100"/>
+			</f:layoutData>
+		</f:Label>
+		<f:Check id="enabledCheck"
+			isSelected="@{downloadCacheEnabled}" label="Use download cache"/>
+		<f:TextInput id="downloadCacheInput"
+			isEnabled="{downloadCacheEnabled}" isEditable="false"
+			text="{downloadCacheDirectory.nativePath}"
+			focusIn="downloadCacheInput_focusInHandler(event)">
+			<f:layoutData>
+				<f:VerticalLayoutData percentWidth="100"/>
+			</f:layoutData>
+		</f:TextInput>
+		<f:Button id="chooseDirectoryButton" isEnabled="{downloadCacheEnabled}"
+			label="Choose Directory"
+			triggered="chooseDirectoryButton_triggeredHandler(event)"/>
+	</f:LayoutGroup>
+	
+	<f:Header id="footer">
+		<f:layoutData>
+			<f:AnchorLayoutData right="0" bottom="0" left="0"/>
+		</f:layoutData>
+		<f:leftItems>
+			<fx:Vector type="starling.display.DisplayObject">
+				<f:Button id="saveButton" styleName="{Button.ALTERNATE_STYLE_NAME_BACK_BUTTON}"
+					label="Save" triggered="saveButton_triggeredHandler(event)"/>
+			</fx:Vector>
+		</f:leftItems>
+	</f:Header>
+	
+	<fx:Script><![CDATA[
+		import feathers.controls.Alert;
+		import feathers.controls.Button;
+		import feathers.data.ListCollection;
+
+		import flash.events.Event;
+
+		import starling.events.Event;
+
+		private var _tempDownloadCacheDirectory:File;
+
+		[Bindable]
+		public var downloadCacheEnabled:Boolean = false;
+
+		private var _downloadCacheDirectory:File;
+
+		[Bindable("downloadCacheDirectoryChange")]
+		public function get downloadCacheDirectory():File
+		{
+			return this._downloadCacheDirectory;
+		}
+
+		public function set downloadCacheDirectory(value:File):void
+		{
+			this._downloadCacheDirectory = value;
+			this.dispatchEventWith("downloadCacheDirectoryChange");
+		}
+
+		private function browseForDownloadCacheFolder():void
+		{
+			this._tempDownloadCacheDirectory = new File();
+			this._tempDownloadCacheDirectory.addEventListener(flash.events.Event.SELECT, downloadCacheDirectory_selectHandler);
+			this._tempDownloadCacheDirectory.addEventListener(flash.events.Event.CANCEL, downloadCacheDirectory_cancelHandler);
+			this._tempDownloadCacheDirectory.browseForDirectory("Choose a download cache directory");
+		}
+
+		private function chooseDirectoryButton_triggeredHandler(event:starling.events.Event):void
+		{
+			this.browseForDownloadCacheFolder();
+		}
+
+		private function downloadCacheDirectory_selectHandler(event:flash.events.Event):void
+		{
+			this.downloadCacheDirectory = this._tempDownloadCacheDirectory;
+
+			this._tempDownloadCacheDirectory.removeEventListener(flash.events.Event.SELECT, downloadCacheDirectory_selectHandler);
+			this._tempDownloadCacheDirectory.removeEventListener(flash.events.Event.CANCEL, downloadCacheDirectory_cancelHandler);
+			this._tempDownloadCacheDirectory = null;
+		}
+
+		private function downloadCacheDirectory_cancelHandler(event:flash.events.Event):void
+		{
+			this._tempDownloadCacheDirectory.removeEventListener(flash.events.Event.SELECT, downloadCacheDirectory_selectHandler);
+			this._tempDownloadCacheDirectory.removeEventListener(flash.events.Event.CANCEL, downloadCacheDirectory_cancelHandler);
+			this._tempDownloadCacheDirectory = null;
+
+			if(this.downloadCacheInput.hasFocus)
+			{
+				this.downloadCacheInput.clearFocus();
+			}
+		}
+
+		private function saveButton_triggeredHandler(event:starling.events.Event):void
+		{
+			if(this.downloadCacheEnabled && (!this._downloadCacheDirectory || !this._downloadCacheDirectory.exists))
+			{
+				Alert.show("Please select a download cache directory or disable this setting.", "Error", new ListCollection(
+						[
+							{label: "OK"}
+						]));
+				return;
+			}
+			this.dispatchEventWith(starling.events.Event.COMPLETE);
+		}
+
+		protected function downloadCacheInput_focusInHandler(event:starling.events.Event):void
+		{
+			if(this.downloadCacheInput.text.length === 0)
+			{
+				this.browseForDownloadCacheFolder();
+			}
+		}
+		]]></fx:Script>
+</f:Screen>

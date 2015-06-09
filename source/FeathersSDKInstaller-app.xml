@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<application xmlns="http://ns.adobe.com/air/application/18.0">
+	<id>com.feathersui.FeathersSDKInstaller</id>
+	<filename>Feathers SDK Installer</filename>
+	<name>Feathers SDK Installer</name>
+	<versionNumber>1.0.0</versionNumber>
+	<description>Installs and configures the Feathers SDK and its dependencies.</description>
+	<copyright>2015 Josh Tynjala</copyright>
+
+	<initialWindow>
+		<content>FeathersSDKInstaller.swf</content>
+		<title>Feathers SDK Installer</title>
+		<systemChrome>standard</systemChrome>
+		<visible>true</visible>
+		<minimizable>true</minimizable>
+		<maximizable>false</maximizable>
+		<resizable>false</resizable>
+		<width>640</width>
+		<height>320</height>
+        <renderMode>direct</renderMode>
+		<requestedDisplayResolution>high</requestedDisplayResolution>
+		<autoOrients>false</autoOrients>
+        <fullScreen>false</fullScreen>
+    </initialWindow>
+	<supportedProfiles>extendedDesktop</supportedProfiles>
+	<supportedLanguages>en</supportedLanguages>
+
+	<icon>
+		<image16x16>icon16.png</image16x16>
+		<image32x32>icon32.png</image32x32>
+		<image48x48>icon48.png</image48x48>
+		<image128x128>icon128.png</image128x128>
+		<image512x512>icon512.png</image512x512>
+	</icon>
+</application>

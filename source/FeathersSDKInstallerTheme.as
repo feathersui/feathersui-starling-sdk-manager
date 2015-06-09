@@ -1,0 +1,130 @@
+package
+{
+	import feathers.controls.Check;
+	import feathers.controls.ImageLoader;
+	import feathers.themes.MetalWorksDesktopTheme;
+
+	import flash.desktop.Icon;
+	import flash.display.BitmapData;
+	import flash.display.Loader;
+	import flash.filesystem.File;
+
+	import starling.textures.Texture;
+
+	import utils.CustomStyleNames;
+
+	public class FeathersSDKInstallerTheme extends MetalWorksDesktopTheme
+	{
+		[Embed(source="/../assets/images/feathers-sdk-logo.png")]
+		private static const FEATHERS_SDK_LOGO:Class;
+		
+		[Embed(source="/../assets/images/adobe-air-logo.png")]
+		private static const ADOBE_AIR_LOGO:Class;
+		
+		[Embed(source="/../assets/images/install-failed-icon.png")]
+		private static const INSTALL_FAILED_ICON:Class;
+		
+		private static const ICON_SIZE:int = 160;
+		
+		public function FeathersSDKInstallerTheme()
+		{
+			super();
+		}
+		
+		protected var loader:Loader;
+		protected var sdkLogoTexture:Texture;
+		protected var adobeRuntimesLogoTexture:Texture;
+		protected var directoryTexture:Texture;
+		protected var installFailedIconTexture:Texture;
+		
+		override public function dispose():void
+		{
+			if(this.sdkLogoTexture)
+			{
+				this.sdkLogoTexture.dispose();
+				this.sdkLogoTexture = null;
+			}
+			if(this.adobeRuntimesLogoTexture)
+			{
+				this.adobeRuntimesLogoTexture.dispose();
+				this.adobeRuntimesLogoTexture = null;
+			}
+			if(this.directoryTexture)
+			{
+				this.directoryTexture.dispose();
+				this.directoryTexture = null;
+			}
+			if(this.installFailedIconTexture)
+			{
+				this.installFailedIconTexture.dispose();
+				this.installFailedIconTexture = null;
+			}
+			super.dispose();
+		}
+		
+		override protected function initializeTextures():void
+		{
+			super.initializeTextures();
+			this.sdkLogoTexture = Texture.fromEmbeddedAsset(FEATHERS_SDK_LOGO);
+			this.adobeRuntimesLogoTexture = Texture.fromEmbeddedAsset(ADOBE_AIR_LOGO);
+			var directoryIcon:Icon = File.documentsDirectory.icon;
+			var directoryIconBitmapData:BitmapData = BitmapData(directoryIcon.bitmaps[directoryIcon.bitmaps.length - 1]);
+			this.directoryTexture = Texture.fromBitmapData(directoryIconBitmapData, false, false, 2);
+			this.installFailedIconTexture = Texture.fromEmbeddedAsset(INSTALL_FAILED_ICON);
+		}
+		
+		override protected function initializeStyleProviders():void
+		{
+			super.initializeStyleProviders();
+			
+			this.getStyleProviderForClass(Check).setFunctionForStyleName(
+				CustomStyleNames.ALTERNATE_STYLE_NAME_ITEM_RENDERER_CHECK, setItemRendererCheckStyles);
+			
+			this.getStyleProviderForClass(ImageLoader).setFunctionForStyleName(
+				CustomStyleNames.ALTERNATE_STYLE_NAME_FEATHERS_SDK_ICON_IMAGE_LOADER, setFeathersSDKIconImageLoaderStyles);
+			this.getStyleProviderForClass(ImageLoader).setFunctionForStyleName(
+				CustomStyleNames.ALTERNATE_STYLE_NAME_ADOBE_RUNTIMES_ICON_IMAGE_LOADER, setAdobeRuntimesIconImageLoaderStyles);
+			this.getStyleProviderForClass(ImageLoader).setFunctionForStyleName(
+				CustomStyleNames.ALTERNATE_STYLE_NAME_DIRECTORY_ICON_IMAGE_LOADER, setDirectoryIconImageLoaderStyles);
+			this.getStyleProviderForClass(ImageLoader).setFunctionForStyleName(
+				CustomStyleNames.ALTERNATE_STYLE_NAME_INSTALL_FAILED_ICON_IMAGE_LOADER, setInstallFailedIconImageLoaderStyles);
+		}
+		
+		protected function setItemRendererCheckStyles(check:Check):void
+		{
+			this.setCheckStyles(check);
+			
+			//don't bold the fonts
+			check.defaultLabelProperties.elementFormat = this.lightElementFormat;
+			check.disabledLabelProperties.elementFormat = this.disabledElementFormat;
+			
+			//use a slightly larger gap because the item renderer has bigger
+			//padding around the edges
+			check.gap = this.gutterSize;
+		}
+		
+		protected function setFeathersSDKIconImageLoaderStyles(loader:ImageLoader):void
+		{
+			loader.source = this.sdkLogoTexture;
+			loader.setSize(ICON_SIZE, ICON_SIZE);
+		}
+		
+		protected function setAdobeRuntimesIconImageLoaderStyles(loader:ImageLoader):void
+		{
+			loader.source = this.adobeRuntimesLogoTexture;
+			loader.setSize(ICON_SIZE, ICON_SIZE);
+		}
+		
+		protected function setDirectoryIconImageLoaderStyles(loader:ImageLoader):void
+		{
+			loader.source = this.directoryTexture;
+			loader.setSize(ICON_SIZE, ICON_SIZE);
+		}
+		
+		protected function setInstallFailedIconImageLoaderStyles(loader:ImageLoader):void
+		{
+			loader.source = this.installFailedIconTexture;
+			loader.setSize(ICON_SIZE, ICON_SIZE);
+		}
+	}
+}

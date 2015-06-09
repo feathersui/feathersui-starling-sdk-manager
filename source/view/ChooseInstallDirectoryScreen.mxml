@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<f:Screen xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:f="library://ns.feathersui.com/mxml">
+	
+	<fx:Metadata>
+		[Event(name="complete", type="starling.events.Event")]
+		[Event(name="cancel", type="starling.events.Event")]
+	</fx:Metadata>
+	
+	<f:layout>
+		<f:AnchorLayout/>
+	</f:layout>
+	
+	<f:LayoutGroup>
+		<f:layout>
+			<f:HorizontalLayout gap="10" padding="10" verticalAlign="middle"/>
+		</f:layout>
+		<f:layoutData>
+			<f:AnchorLayoutData top="0" right="0" bottom="0" left="0"
+				bottomAnchorDisplayObject="{footer}"/>
+		</f:layoutData>
+		
+		<f:ImageLoader styleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_DIRECTORY_ICON_IMAGE_LOADER}"/>
+		
+		<f:LayoutGroup>
+			<f:layout>
+				<f:VerticalLayout gap="10" horizontalAlign="left" verticalAlign="middle"/>
+			</f:layout>
+			<f:layoutData>
+				<f:HorizontalLayoutData percentWidth="100"/>
+			</f:layoutData>
+			<f:Label styleName="{Label.ALTERNATE_STYLE_NAME_HEADING}"
+				wordWrap="true"
+				text="Step 3: Choose an empty directory where the Feathers SDK may be installed.">
+				<f:layoutData>
+					<f:VerticalLayoutData percentWidth="100"/>
+				</f:layoutData>
+			</f:Label>
+			<f:TextInput id="installDirectoryPathInput" isEditable="false"
+				text="{installDirectory.nativePath}"
+				focusIn="installDirectoryPathInput_focusInHandler(event)">
+				<f:layoutData>
+					<f:VerticalLayoutData percentWidth="100"/>
+				</f:layoutData>
+			</f:TextInput>
+			<f:Button label="Choose Directory" triggered="chooseInstallDirectoryButton_triggeredHandler(event)"/>
+		</f:LayoutGroup>
+	</f:LayoutGroup>
+	
+	<f:Header id="footer">
+		<f:layoutData>
+			<f:AnchorLayoutData right="0" bottom="0" left="0"/>
+		</f:layoutData>
+		<f:leftItems>
+			<fx:Vector type="starling.display.DisplayObject">
+				<f:Button id="backButton" styleName="{Button.ALTERNATE_STYLE_NAME_BACK_BUTTON}"
+					label="Back" triggered="backButton_triggeredHandler(event)"/>
+			</fx:Vector>
+		</f:leftItems>
+		<f:rightItems>
+			<fx:Vector type="starling.display.DisplayObject">
+				<f:Button id="forwardButton" styleName="{Button.ALTERNATE_STYLE_NAME_FORWARD_BUTTON}"
+					isEnabled="false" label="Next" triggered="forwardButton_triggeredHandler(event)"/>
+			</fx:Vector>
+		</f:rightItems>
+	</f:Header>
+	
+	<fx:Script><![CDATA[
+		import feathers.controls.Alert;
+		import feathers.controls.Button;
+		import feathers.controls.Label;
+		import feathers.data.ListCollection;
+		
+		import flash.events.Event;
+
+		import starling.events.Event;
+
+		import utils.CustomStyleNames;
+
+		private var _tempInstallDirectory:File;
+
+		private var _installDirectory:File;
+
+		[Bindable("installDirectoryChange")]
+		public function get installDirectory():File
+		{
+			return this._installDirectory;
+		}
+
+		public function set installDirectory(value:File):void
+		{
+			if(value)
+			{
+				this.forwardButton.isEnabled = true;
+			}
+			else
+			{
+				this.forwardButton.isEnabled = false;
+			}
+			this._installDirectory = value;
+			this.dispatchEventWith("installDirectoryChange");
+		}
+
+		protected function checkDirWritable(file:File):void
+		{
+			var bytes:ByteArray = new ByteArray();
+			bytes.writeUTFBytes("1");
+			var fs:FileStream = new FileStream();
+			fs.open(file, FileMode.WRITE);
+			fs.writeBytes(bytes);
+			fs.close();
+			file.deleteFile();
+			bytes.clear();
+		}
+
+		private function isDirectoryEmpty(dir:File):Boolean
+		{
+			var result:Boolean;
+
+			var filesArray:Array = dir.getDirectoryListing();
+
+			var length:int = filesArray.length;
+			result = length == 0;
+			if(length == 1)
+			{
+				var explodedPath:Array = File(filesArray[0]).url.split("/");
+
+				// the .DS_Store file doesn't bother anybody, so we can safely ignore it.
+				// also ignore local.properties so you an override install settings
+				result = explodedPath[explodedPath.length - 1] == ".DS_Store" ||
+				explodedPath[explodedPath.length - 1] == "local.properties";
+			}
+
+			return result;
+		}
+
+		private function browseForInstallDirectory():void
+		{
+			this._tempInstallDirectory = new File();
+			this._tempInstallDirectory.addEventListener(flash.events.Event.SELECT, installDirectory_selectHandler);
+			this._tempInstallDirectory.addEventListener(flash.events.Event.CANCEL, installDirectory_cancelHandler);
+			this._tempInstallDirectory.browseForDirectory("Choose an empty directory where the Feathers SDK may be installed");
+		}
+
+		private function chooseInstallDirectoryButton_triggeredHandler(event:starling.events.Event):void
+		{
+			this.browseForInstallDirectory();
+		}
+
+		private function backButton_triggeredHandler(event:starling.events.Event):void
+		{
+			this.dispatchEventWith(starling.events.Event.CANCEL);
+		}
+
+		private function forwardButton_triggeredHandler(event:starling.events.Event):void
+		{
+			this.dispatchEventWith(starling.events.Event.COMPLETE);
+		}
+
+		private function installDirectory_selectHandler(event:flash.events.Event):void
+		{
+			// Quick check to see if the selected directory is writable
+			try
+			{
+				var f:File = new File(this._tempInstallDirectory.nativePath + File.separator + "feathers.txt");
+				checkDirWritable(f);
+			}
+			catch(e:Error)
+			{
+				Alert.show("The selected directory requires Administrator rights to write files.", "Invalid Directory", new ListCollection(
+						[
+							{label: "OK"}
+						]));
+				this._tempInstallDirectory.removeEventListener(flash.events.Event.SELECT, installDirectory_selectHandler);
+				this._tempInstallDirectory.removeEventListener(flash.events.Event.CANCEL, installDirectory_cancelHandler);
+				this._tempInstallDirectory = null;
+				return;
+			}
+			if(isDirectoryEmpty(this._tempInstallDirectory))
+			{
+				this.installDirectory = this._tempInstallDirectory;
+			}
+			else
+			{
+				Alert.show("The selected directory is not empty. Please select an empty directory.", "Invalid Directory", new ListCollection(
+						[
+							{label: "OK"}
+						]));
+			}
+			this._tempInstallDirectory.removeEventListener(flash.events.Event.SELECT, installDirectory_selectHandler);
+			this._tempInstallDirectory.removeEventListener(flash.events.Event.CANCEL, installDirectory_cancelHandler);
+			this._tempInstallDirectory = null;
+		}
+
+		private function installDirectory_cancelHandler(event:flash.events.Event):void
+		{
+			this._tempInstallDirectory.removeEventListener(flash.events.Event.SELECT, installDirectory_selectHandler);
+			this._tempInstallDirectory.removeEventListener(flash.events.Event.CANCEL, installDirectory_cancelHandler);
+			this._tempInstallDirectory = null;
+
+			if(this.installDirectoryPathInput.hasFocus)
+			{
+				this.installDirectoryPathInput.clearFocus();
+			}
+		}
+
+		protected function installDirectoryPathInput_focusInHandler(event:starling.events.Event):void
+		{
+			//if it's empty, let's browse.
+			//but if there's text, we should allow it to be selected.
+			if(this.installDirectoryPathInput.text.length === 0)
+			{
+				this.browseForInstallDirectory();
+			}
+		}
+		]]></fx:Script>
+</f:Screen>

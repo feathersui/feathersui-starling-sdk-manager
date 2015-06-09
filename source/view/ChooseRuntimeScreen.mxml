@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<f:Screen xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:f="library://ns.feathersui.com/mxml">
+	
+	<fx:Metadata>
+		[Event(name="complete", type="Event")]
+	</fx:Metadata>
+	
+	<f:layout>
+		<f:AnchorLayout/>
+	</f:layout>
+	
+	<f:LayoutGroup>
+		<f:layout>
+			<f:HorizontalLayout gap="10" padding="10" verticalAlign="middle"/>
+		</f:layout>
+		<f:layoutData>
+			<f:AnchorLayoutData top="0" right="0" bottom="0" left="0"
+				bottomAnchorDisplayObject="{footer}"/>
+		</f:layoutData>
+		
+		<f:ImageLoader styleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_ADOBE_RUNTIMES_ICON_IMAGE_LOADER}"/>
+		
+		<f:LayoutGroup>
+			<f:layout>
+				<f:VerticalLayout gap="10" horizontalAlign="left"/>
+			</f:layout>
+			<f:layoutData>
+				<f:HorizontalLayoutData percentWidth="100"/>
+			</f:layoutData>
+			<f:Label styleName="{Label.ALTERNATE_STYLE_NAME_HEADING}"
+				wordWrap="true"
+				text="Step 2: Choose the runtimes to target.">
+				<f:layoutData>
+					<f:VerticalLayoutData percentWidth="100"/>
+				</f:layoutData>
+			</f:Label>
+			<f:PickerList id="runtimesList"
+				selectedItem="{selectedRuntime}"
+				change="runtimesList_changeHandler(event)">
+				<f:typicalItem>
+					<fx:Object label="Adobe AIR 00.0 Beta and Flash Player 00.0 Beta"/>
+				</f:typicalItem>
+				<f:ListCollection data="{runtimes}"/>
+			</f:PickerList>
+		</f:LayoutGroup>
+	</f:LayoutGroup>
+	
+	<f:Header id="footer">
+		<f:layoutData>
+			<f:AnchorLayoutData right="0" bottom="0" left="0"/>
+		</f:layoutData>
+		<f:leftItems>
+			<fx:Vector type="starling.display.DisplayObject">
+				<f:Button id="backButton" styleName="{Button.ALTERNATE_STYLE_NAME_BACK_BUTTON}"
+					label="Back" triggered="backButton_triggeredHandler(event)"/>
+			</fx:Vector>
+		</f:leftItems>
+		<f:rightItems>
+			<fx:Vector type="starling.display.DisplayObject">
+				<f:Button id="forwardButton" styleName="{Button.ALTERNATE_STYLE_NAME_FORWARD_BUTTON}"
+					isEnabled="false" label="Next" triggered="forwardButton_triggeredHandler(event)"/>
+			</fx:Vector>
+		</f:rightItems>
+	</f:Header>
+	
+	<fx:Script><![CDATA[
+		import feathers.controls.Button;
+
+		import model.RuntimeConfigurationItem;
+
+		import utils.CustomStyleNames;
+
+		[Bindable]
+		public var runtimes:Vector.<RuntimeConfigurationItem>;
+
+		private var _selectedRuntime:RuntimeConfigurationItem;
+
+		[Bindable("selectedRuntimeChange")]
+		public function get selectedRuntime():RuntimeConfigurationItem
+		{
+			return this._selectedRuntime;
+		}
+
+		public function set selectedRuntime(value:RuntimeConfigurationItem):void
+		{
+			if(value)
+			{
+				this.forwardButton.isEnabled = true;
+			}
+			else
+			{
+				this.forwardButton.isEnabled = false;
+			}
+			this._selectedRuntime = value;
+			this.dispatchEventWith("selectedRuntimeChange");
+		}
+
+		protected function backButton_triggeredHandler(event:Event):void
+		{
+			this.dispatchEventWith(Event.CANCEL);
+		}
+
+		private function forwardButton_triggeredHandler(event:Event):void
+		{
+			this.dispatchEventWith(Event.COMPLETE);
+		}
+
+		protected function runtimesList_changeHandler(event:Event):void
+		{
+			this.selectedRuntime = RuntimeConfigurationItem(this.runtimesList.selectedItem);
+		}
+		]]></fx:Script>
+</f:Screen>

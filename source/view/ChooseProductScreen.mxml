@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<f:Screen xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:f="library://ns.feathersui.com/mxml">
+	
+	<fx:Metadata>
+		[Event(name="complete", type="starling.events.Event")]
+	</fx:Metadata>
+	
+	<f:layout>
+		<f:AnchorLayout/>
+	</f:layout>
+	
+	<f:LayoutGroup>
+		<f:layout>
+			<f:HorizontalLayout gap="10" padding="10" verticalAlign="middle"/>
+		</f:layout>
+		<f:layoutData>
+			<f:AnchorLayoutData top="0" right="0" bottom="0" left="0"
+				bottomAnchorDisplayObject="{footer}"/>
+		</f:layoutData>
+		
+		<f:ImageLoader styleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_FEATHERS_SDK_ICON_IMAGE_LOADER}"/>
+		
+		<f:LayoutGroup>
+			<f:layout>
+				<f:VerticalLayout gap="10" horizontalAlign="left" verticalAlign="middle"/>
+			</f:layout>
+			<f:layoutData>
+				<f:HorizontalLayoutData percentWidth="100"/>
+			</f:layoutData>
+			
+			<f:Label styleName="{Label.ALTERNATE_STYLE_NAME_HEADING}"
+				wordWrap="true"
+				text="Step 1: Choose a version of the Feathers SDK.">
+				<f:layoutData>
+					<f:VerticalLayoutData percentWidth="100"/>
+				</f:layoutData>
+			</f:Label>
+			<f:PickerList id="productsList"
+				selectedItem="{selectedProduct}"
+				change="productsList_changeHandler(event)">
+				<f:typicalItem>
+					<fx:Object label="Feathers SDK 00.0.0 Prerelease"/>
+				</f:typicalItem>
+				<f:ListCollection data="{products}"/>
+			</f:PickerList>
+		</f:LayoutGroup>
+	</f:LayoutGroup>
+	
+	<f:Header id="footer">
+		<f:layoutData>
+			<f:AnchorLayoutData right="0" bottom="0" left="0"/>
+		</f:layoutData>
+		<f:rightItems>
+			<fx:Vector type="starling.display.DisplayObject">
+				<f:Button id="forwardButton" styleName="{Button.ALTERNATE_STYLE_NAME_FORWARD_BUTTON}"
+					isEnabled="false" label="Next" triggered="forwardButton_triggeredHandler(event)"/>
+			</fx:Vector>
+		</f:rightItems>
+	</f:Header>
+	
+	<fx:Script><![CDATA[
+		import feathers.controls.Button;
+
+		import model.ProductConfigurationItem;
+
+		import starling.events.Event;
+
+		import utils.CustomStyleNames;
+
+		[Bindable]
+		public var products:Vector.<ProductConfigurationItem>;
+
+		private var _selectedProduct:ProductConfigurationItem;
+
+		[Bindable("selectedProductChange")]
+		public function get selectedProduct():ProductConfigurationItem
+		{
+			return this._selectedProduct;
+		}
+
+		public function set selectedProduct(value:ProductConfigurationItem):void
+		{
+			if(value)
+			{
+				this.forwardButton.isEnabled = true;
+			}
+			else
+			{
+				this.forwardButton.isEnabled = false;
+			}
+			this._selectedProduct = value;
+			this.forwardButton.isEnabled = value !== null;
+			this.dispatchEventWith("selectedProductChange");
+		}
+
+		private function productsList_changeHandler(event:Event):void
+		{
+			this.selectedProduct = ProductConfigurationItem(this.productsList.selectedItem);
+		}
+
+		private function forwardButton_triggeredHandler(event:Event):void
+		{
+			this.dispatchEventWith(starling.events.Event.COMPLETE);
+		}
+		]]></fx:Script>
+</f:Screen>

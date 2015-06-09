@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<f:Screen xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:f="library://ns.feathersui.com/mxml">
+	
+	<fx:Metadata>
+		[Event(name="complete", type="starling.events.Event")]
+	</fx:Metadata>
+	
+	<f:layout>
+		<f:AnchorLayout/>
+	</f:layout>
+	
+	<f:LayoutGroup>
+		<f:layoutData>
+			<f:AnchorLayoutData top="0" right="0" bottom="0" left="0"
+				bottomAnchorDisplayObject="{footer}"/>
+		</f:layoutData>
+		<f:layout>
+			<f:VerticalLayout gap="10" padding="10"
+				horizontalAlign="center" verticalAlign="middle"/>
+		</f:layout>
+		
+		<f:Label styleName="{Label.ALTERNATE_STYLE_NAME_HEADING}"
+			text="Installation Complete"/>
+		<f:ImageLoader styleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_FEATHERS_SDK_ICON_IMAGE_LOADER}"/>
+		<f:Label text="The Feathers SDK has been successfully installed."/>
+	</f:LayoutGroup>
+	
+	<f:Header id="footer">
+		<f:layoutData>
+			<f:AnchorLayoutData right="0" bottom="0" left="0"/>
+		</f:layoutData>
+		<f:rightItems>
+			<fx:Vector type="starling.display.DisplayObject">
+				<f:Button label="Exit" triggered="exitButton_triggeredHandler(event)"/>
+			</fx:Vector>
+		</f:rightItems>
+	</f:Header>
+	<fx:Script><![CDATA[
+		import utils.CustomStyleNames;
+
+		protected function exitButton_triggeredHandler(event:Event):void
+		{
+			this.dispatchEventWith(Event.COMPLETE);
+		}
+		]]></fx:Script>
+</f:Screen>

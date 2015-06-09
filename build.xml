@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="feathers-sdk-installer" default="build" basedir=".">
+	
+	<!-- build.local.properties and sdk.local.proprties are optional files that
+		can be used to override the default properties. -->
+	<property file="./sdk.local.properties"/>
+	<property file="./sdk.properties"/>
+	<property file="./build.local.properties"/>
+	<property file="./build.properties"/>
+
+	<condition property="bundle.extension" value="app">
+		<os family="mac" />
+	</condition>
+	<condition property="bundle.extension" value="exe">
+		<os family="windows" />
+	</condition>
+	
+	<!-- these properties should be defined in build.local.properties -->
+	<fail unless="certificate.path"/>
+	<fail unless="certificate.password"/>
+
+	<target name="-prepare">
+		<delete dir="${output.path}"/>
+	</target>
+
+	<target name="-build-swf" depends="-prepare">
+		<echo message="Building FeathersSDKInstaller.swf"/>
+		<java jar="${mxmlc}" dir="${basedir}" fork="true" failonerror="true">
+			<arg value="+flexlib"/>
+			<arg value="${frameworks.root}"/>
+			<arg value="+configname=air"/>
+			<arg value="-swf-version=${swf.version}"/>
+			<arg value="-source-path+=${source.root}"/>
+			<arg value="-library-path+=${library.root}"/>
+			<arg value="${source.root}/FeathersSDKInstaller.mxml"/>
+			<arg value="-output=${output.path}/FeathersSDKInstaller.swf"/>
+		</java>
+	</target>
+
+	<target name="build" depends="-build-swf" description="Builds application for the current platform">
+		<echo message="Packaging FeathersSDKInstaller.${bundle.extension}"/>
+		<java jar="${adt}" dir="${basedir}" fork="true" failonerror="true">
+			<arg value="-package"/>
+			<arg value="-storetype"/>
+			<arg value="pkcs12"/>
+			<arg value="-keystore"/>
+			<arg value="${certificate.path}"/>
+			<arg value="-storepass"/>
+			<arg value="${certificate.password}"/>
+			<arg value="-target"/>
+			<arg value="bundle"/>
+			<arg value="${output.path}/FeathersSDKInstaller.${bundle.extension}"/>
+			<arg value="${source.root}/FeathersSDKInstaller-app.xml"/>
+			<arg value="-C"/>
+			<arg value="${icon.path}"/>
+			<arg line="icon16.png"/>
+			<arg line="icon32.png"/>
+			<arg line="icon48.png"/>
+			<arg line="icon128.png"/>
+			<arg line="icon512.png"/>
+			<arg value="-C"/>
+			<arg value="${output.path}"/>
+			<arg value="FeathersSDKInstaller.swf"/>
+		</java>
+		<delete file="${output.path}/FeathersSDKInstaller.swf"/>
+	</target>
+</project>
