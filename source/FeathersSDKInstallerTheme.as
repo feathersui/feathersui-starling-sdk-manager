@@ -21,7 +21,6 @@ package
 
 	import flash.desktop.Icon;
 	import flash.display.BitmapData;
-	import flash.display.Loader;
 	import flash.filesystem.File;
 
 	import starling.textures.Texture;
@@ -46,7 +45,6 @@ package
 			super();
 		}
 		
-		protected var loader:Loader;
 		protected var sdkLogoTexture:Texture;
 		protected var adobeRuntimesLogoTexture:Texture;
 		protected var directoryTexture:Texture;
