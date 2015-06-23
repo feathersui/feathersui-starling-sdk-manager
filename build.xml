@@ -8,6 +8,9 @@
 	<property file="./build.local.properties"/>
 	<property file="./build.properties"/>
 
+	<condition property="is.mac" value="true">
+		<os family="mac" />
+	</condition>
 	<condition property="bundle.extension" value="app">
 		<os family="mac" />
 	</condition>
@@ -15,9 +18,24 @@
 		<os family="windows" />
 	</condition>
 	
-	<!-- these properties should be defined in build.local.properties -->
-	<fail unless="certificate.path"/>
-	<fail unless="certificate.password"/>
+	<!-- required properties that will cause the build to fail if missing -->
+	<fail unless="certificate.path" message="Must define certificate.path in build.local.properties"/>
+	<fail unless="certificate.password" message="Must define certificate.password in build.local.properties"/>
+	<fail message="Must define mac.certificate.name in build.local.properties">
+		<condition>
+			<and>
+				<os family="mac" />
+				<not>
+					<isset property="mac.certificate.name"/>
+				</not>
+			</and>
+		</condition>
+	</fail>
+
+	<target name="build" depends="-build-win,-build-mac" description="Builds the Feathers SDK installer for the current platform"/>
+
+	<target name="-build-win" depends="-build-air-bundle" unless="is.mac"/>
+	<target name="-build-mac" depends="-build-air-bundle,-sign-mac" if="is.mac"/>
 
 	<target name="-prepare">
 		<delete dir="${output.path}"/>
@@ -32,12 +50,13 @@
 			<arg value="-swf-version=${swf.version}"/>
 			<arg value="-source-path+=${source.root}"/>
 			<arg value="-library-path+=${library.root}"/>
+			<arg value="-library-path+=${theme.root}"/>
 			<arg value="${source.root}/FeathersSDKInstaller.mxml"/>
 			<arg value="-output=${output.path}/FeathersSDKInstaller.swf"/>
 		</java>
 	</target>
 
-	<target name="build" depends="-build-swf" description="Builds application for the current platform">
+	<target name="-build-air-bundle" depends="-build-swf">
 		<echo message="Packaging FeathersSDKInstaller.${bundle.extension}"/>
 		<java jar="${adt}" dir="${basedir}" fork="true" failonerror="true">
 			<arg value="-package"/>
@@ -63,5 +82,30 @@
 			<arg value="FeathersSDKInstaller.swf"/>
 		</java>
 		<delete file="${output.path}/FeathersSDKInstaller.swf"/>
+	</target>
+
+	<target name="-sign-mac">
+		<echo message="Signing FeathersSDKInstaller.${bundle.extension}"/>
+		<exec executable="${mac.codesign}">
+			<arg value="-f"/>
+			<arg value="-v"/>
+			<arg value="-s"/>
+			<arg value="${mac.certificate.name}"/>
+			<arg value="${output.path}/FeathersSDKInstaller.${bundle.extension}/Contents/Frameworks/Adobe AIR.framework"/>
+		</exec>
+		<exec executable="${mac.codesign}">
+			<arg value="-f"/>
+			<arg value="-v"/>
+			<arg value="-s"/>
+			<arg value="${mac.certificate.name}"/>
+			<arg value="${output.path}/FeathersSDKInstaller.${bundle.extension}"/>
+		</exec>
+		<echo message="Verifying signature for FeathersSDKInstaller.${bundle.extension}"/>
+		<exec executable="${mac.spctl}">
+			<arg value="--assess"/>
+			<arg value="--type"/>
+			<arg value="execute"/>
+			<arg value="${output.path}/FeathersSDKInstaller.${bundle.extension}"/>
+		</exec>
 	</target>
 </project>
