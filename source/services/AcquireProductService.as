@@ -114,7 +114,7 @@ package services
 			this._loader.load(new URLRequest(url));
 		}
 		
-		private function getProductURL():String
+		private function getProductFileName():String
 		{
 			var selectedProduct:ProductConfigurationItem = this.installerModel.selectedProduct;
 			var extension:String = ".tar.gz";
@@ -122,7 +122,13 @@ package services
 			{
 				extension = ".zip";
 			}
-			return selectedProduct.path + selectedProduct.file + extension;
+			return selectedProduct.file + extension;
+		}
+		
+		private function getProductURL():String
+		{
+			var selectedProduct:ProductConfigurationItem = this.installerModel.selectedProduct;
+			return selectedProduct.path + this.getProductFileName();
 		}
 		
 		private function getProductCacheFile():File
@@ -139,7 +145,7 @@ package services
 		private function saveProductFile(bytes:ByteArray):void
 		{	
 			var selectedProduct:ProductConfigurationItem = this.installerModel.selectedProduct;
-			var binaryDistribution:File = this._tempDirectory.resolvePath(selectedProduct.file);
+			var binaryDistribution:File = this._tempDirectory.resolvePath(this.getProductFileName());
 			if(binaryDistribution.exists)
 			{
 				//replace the old file
@@ -167,7 +173,7 @@ package services
 		private function decompress():void
 		{
 			var selectedProduct:ProductConfigurationItem = this.installerModel.selectedProduct;
-			var binaryDistribution:File = this._tempDirectory.resolvePath(selectedProduct.file);
+			var binaryDistribution:File = this._tempDirectory.resolvePath(this.getProductFileName());
 			if(!binaryDistribution.exists)
 			{
 				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, BINARY_DISTRIBUTION_NOT_FOUND_ERROR);
@@ -176,13 +182,13 @@ package services
 			}
 			if(this.installerModel.operatingSystem == InstallerModel.OPERATING_SYSTEM_WINDOWS) //zip
 			{
-				this._unzipDirectory = this._tempDirectory.resolvePath(binaryDistribution.name);
+				this._unzipDirectory = this._tempDirectory.resolvePath(selectedProduct.file);
 				this._unzipDirectory.createDirectory();
 				unzip(binaryDistribution, unzip_completeHandler, unzip_errorHandler);
 			}
 			else //Mac and tar.gz
 			{
-				this._unzipDirectory = this._tempDirectory.resolvePath(binaryDistribution.name);
+				this._unzipDirectory = this._tempDirectory.resolvePath(selectedProduct.file);
 				untar(binaryDistribution, this._tempDirectory, unzip_completeHandler, unzip_errorHandler);
 			}
 		}
