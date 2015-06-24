@@ -11,10 +11,10 @@
 	<condition property="is.mac" value="true">
 		<os family="mac" />
 	</condition>
-	<condition property="bundle.extension" value="app">
+	<condition property="bundle.extension" value=".app">
 		<os family="mac" />
 	</condition>
-	<condition property="bundle.extension" value="exe">
+	<condition property="bundle.extension" value="">
 		<os family="windows" />
 	</condition>
 	
@@ -67,7 +67,7 @@
 	</target>
 
 	<target name="-build-air-bundle" depends="-build-swf">
-		<echo message="Packaging FeathersSDKInstaller.${bundle.extension}"/>
+		<echo message="Packaging FeathersSDKInstaller${bundle.extension}"/>
 		<java jar="${adt}" dir="${basedir}" fork="true" failonerror="true">
 			<arg value="-package"/>
 			<arg value="-storetype"/>
@@ -78,7 +78,7 @@
 			<arg value="${certificate.password}"/>
 			<arg value="-target"/>
 			<arg value="bundle"/>
-			<arg value="${output.path}/FeathersSDKInstaller.${bundle.extension}"/>
+			<arg value="${output.path}/FeathersSDKInstaller${bundle.extension}"/>
 			<arg value="${source.root}/FeathersSDKInstaller-app.xml"/>
 			<arg value="-C"/>
 			<arg value="${icon.path}"/>
@@ -96,43 +96,43 @@
 		<delete file="${output.path}/FeathersSDKInstaller.swf"/>
 	</target>
 
-	<target name="-prepare-bundle-mac">
+	<target name="-prepare-bundle-mac" if="is.mac">
 		<!-- these files are not required for this app -->
-		<delete dir="${output.path}/FeathersSDKInstaller.${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/Flash Player.plugin"/>
-		<delete file="${output.path}/FeathersSDKInstaller.${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/WebKit.dylib"/>
-		<delete file="${output.path}/FeathersSDKInstaller.${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/Adobe AIR.vch"/>
-		<delete dir="${output.path}/FeathersSDKInstaller.${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/AdobeCP15.plugin"/> 
+		<delete dir="${output.path}/FeathersSDKInstaller${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/Flash Player.plugin"/>
+		<delete file="${output.path}/FeathersSDKInstaller${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/WebKit.dylib"/>
+		<delete file="${output.path}/FeathersSDKInstaller${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/Adobe AIR.vch"/>
+		<delete dir="${output.path}/FeathersSDKInstaller${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/AdobeCP15.plugin"/> 
 	</target>
 
-	<target name="-sign-mac">
-		<echo message="Signing FeathersSDKInstaller.${bundle.extension}"/>
+	<target name="-sign-mac" if="is.mac">
+		<echo message="Signing FeathersSDKInstaller${bundle.extension}"/>
 		<exec executable="${mac.codesign}">
 			<arg value="-f"/>
 			<arg value="-v"/>
 			<arg value="-s"/>
 			<arg value="${mac.application.certificate.name}"/>
-			<arg value="${output.path}/FeathersSDKInstaller.${bundle.extension}/Contents/Frameworks/Adobe AIR.framework"/>
+			<arg value="${output.path}/FeathersSDKInstaller${bundle.extension}/Contents/Frameworks/Adobe AIR.framework"/>
 		</exec>
 		<exec executable="${mac.codesign}">
 			<arg value="-f"/>
 			<arg value="-v"/>
 			<arg value="-s"/>
 			<arg value="${mac.application.certificate.name}"/>
-			<arg value="${output.path}/FeathersSDKInstaller.${bundle.extension}"/>
+			<arg value="${output.path}/FeathersSDKInstaller${bundle.extension}"/>
 		</exec>
-		<echo message="Verifying signature for FeathersSDKInstaller.${bundle.extension}"/>
+		<echo message="Verifying signature for FeathersSDKInstaller${bundle.extension}"/>
 		<exec executable="${mac.spctl}">
 			<arg value="--assess"/>
 			<arg value="--type"/>
 			<arg value="execute"/>
-			<arg value="${output.path}/FeathersSDKInstaller.${bundle.extension}"/>
+			<arg value="${output.path}/FeathersSDKInstaller${bundle.extension}"/>
 		</exec>
 	</target>
 
-	<target name="-package-mac">
+	<target name="-package-mac" if="is.mac">
 		<exec executable="${mac.productbuild}">
 			<arg value="--component"/>
-			<arg value="${output.path}/FeathersSDKInstaller.${bundle.extension}"/>
+			<arg value="${output.path}/FeathersSDKInstaller${bundle.extension}"/>
 			<arg value="/Applications"/>
 			<arg value="--sign"/>
 			<arg value="${mac.installer.certificate.name}"/>
@@ -140,6 +140,6 @@
 		</exec>
 
 		<!-- we no longer need the APP -->
-		<delete dir="${output.path}/FeathersSDKInstaller.${bundle.extension}"/>
+		<delete dir="${output.path}/FeathersSDKInstaller${bundle.extension}"/>
 	</target>
 </project>
