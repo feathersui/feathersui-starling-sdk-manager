@@ -19,10 +19,6 @@ package
 	import feathers.controls.ImageLoader;
 	import feathers.themes.MetalWorksDesktopTheme;
 
-	import flash.desktop.Icon;
-	import flash.display.BitmapData;
-	import flash.filesystem.File;
-
 	import starling.textures.Texture;
 
 	import utils.CustomStyleNames;
@@ -31,6 +27,9 @@ package
 	{
 		[Embed(source="/../assets/images/feathers-sdk-logo.png")]
 		private static const FEATHERS_SDK_LOGO:Class;
+		
+		[Embed(source="/../assets/images/feathers-folder.png")]
+		private static const FEATHERS_FOLDER_ICON:Class;
 		
 		[Embed(source="/../assets/images/adobe-air-logo.png")]
 		private static const ADOBE_AIR_LOGO:Class;
@@ -80,9 +79,7 @@ package
 			super.initializeTextures();
 			this.sdkLogoTexture = Texture.fromEmbeddedAsset(FEATHERS_SDK_LOGO);
 			this.adobeRuntimesLogoTexture = Texture.fromEmbeddedAsset(ADOBE_AIR_LOGO);
-			var directoryIcon:Icon = File.documentsDirectory.icon;
-			var directoryIconBitmapData:BitmapData = BitmapData(directoryIcon.bitmaps[directoryIcon.bitmaps.length - 1]);
-			this.directoryTexture = Texture.fromBitmapData(directoryIconBitmapData, false, false, 2);
+			this.directoryTexture = Texture.fromEmbeddedAsset(FEATHERS_FOLDER_ICON);
 			this.installFailedIconTexture = Texture.fromEmbeddedAsset(INSTALL_FAILED_ICON);
 		}
 		
