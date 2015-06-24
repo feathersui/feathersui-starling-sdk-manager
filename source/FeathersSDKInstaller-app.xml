@@ -5,7 +5,7 @@
 	<name>Feathers SDK Installer</name>
 	<versionNumber>1.0.0</versionNumber>
 	<description>Installs and configures the Feathers SDK and its dependencies.</description>
-	<copyright>2015 Josh Tynjala</copyright>
+	<copyright>2015 Bowler Hat LLC</copyright>
 
 	<initialWindow>
 		<content>FeathersSDKInstaller.swf</content>
