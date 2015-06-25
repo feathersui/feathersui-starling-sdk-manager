@@ -19,9 +19,9 @@
 	</condition>
 	
 	<!-- required properties that will cause the build to fail if missing -->
-	<fail unless="certificate.path" message="Must define certificate.path in build.local.properties"/>
-	<fail unless="certificate.password" message="Must define certificate.password in build.local.properties"/>
-	<fail message="Must define mac.application.certificate.name in build.local.properties">
+	<fail unless="air.certificate.path" message="Must define air.certificate.path in build.local.properties to sign AIR application (on Mac, this may be a self-signed certificate because we will re-sign with an Apple certificate later)"/>
+	<fail unless="air.certificate.password" message="Must define air.certificate.password in build.local.properties to sign AIR application (on Mac, this may be a self-signed certificate because we will re-sign with an Apple certificate later)"/>
+	<fail message="Must define mac.application.certificate.name in build.local.properties to sign Mac application (this must be an Apple-issued certificate)">
 		<condition>
 			<and>
 				<os family="mac" />
@@ -31,7 +31,7 @@
 			</and>
 		</condition>
 	</fail>
-	<fail message="Must define mac.installer.certificate.name in build.local.properties">
+	<fail message="Must define mac.installer.certificate.name in build.local.properties to sign Mac installer (this must be an Apple-issued certificate)">
 		<condition>
 			<and>
 				<os family="mac" />
@@ -73,9 +73,9 @@
 			<arg value="-storetype"/>
 			<arg value="pkcs12"/>
 			<arg value="-keystore"/>
-			<arg value="${certificate.path}"/>
+			<arg value="${air.certificate.path}"/>
 			<arg value="-storepass"/>
-			<arg value="${certificate.password}"/>
+			<arg value="${air.certificate.password}"/>
 			<arg value="-target"/>
 			<arg value="bundle"/>
 			<arg value="${output.path}/FeathersSDKInstaller${bundle.extension}"/>
