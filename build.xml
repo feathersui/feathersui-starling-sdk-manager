@@ -44,11 +44,22 @@
 
 	<target name="build" depends="-build-win,-build-mac" description="Builds the Feathers SDK installer for the current platform"/>
 
-	<target name="-build-win" depends="-build-air-bundle" unless="is.mac"/>
+	<target name="-build-win" depends="-build-air-bundle,-prepare-bundle-win,-package-win" unless="is.mac"/>
 	<target name="-build-mac" depends="-build-air-bundle,-prepare-bundle-mac,-sign-mac,-package-mac" if="is.mac"/>
 
 	<target name="-prepare">
 		<delete dir="${output.path}"/>
+		<loadfile srcFile="${source.root}/FeathersSDKInstaller-app.xml" property="version">
+			<filterchain>
+				<linecontains>
+					<contains value="&lt;versionNumber&gt;"/>
+				</linecontains>
+				<striplinebreaks/>
+				<trim/>
+				<replacestring from="&lt;versionNumber&gt;" to=""/>
+				<replacestring from="&lt;/versionNumber&gt;" to=""/>
+			</filterchain>
+		</loadfile>
 	</target>
 
 	<target name="-build-swf" depends="-prepare">
@@ -139,7 +150,52 @@
 			<arg value="${output.path}/FeathersSDKInstaller.pkg"/>
 		</exec>
 
-		<!-- we no longer need the APP -->
+		<!-- clean up -->
 		<delete dir="${output.path}/FeathersSDKInstaller${bundle.extension}"/>
+	</target>
+
+	<target name="-prepare-bundle-win" unless="is.mac">
+		<!-- remove unneeded WebKit and DRM files -->
+		<delete dir="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/WebKit"/>
+		<delete file="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/WebKit.dll"/>
+		<delete file="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/NPSWF32.dll"/>
+		<delete file="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/AdobeCP15.dll"/>
+		<delete file="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/adobecp.vch"/>
+		<delete file="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/AdobeCP.dll"/>
+		<delete file="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/Adobe AIR.vch"/>
+	</target>
+
+	<target name="-package-win" unless="is.mac">
+		<!-- copy installer build scripts to output so that we can build from
+			that location. -->
+		<copy todir="${output.path}">
+			<fileset dir="${basedir}/nsis">
+				<include name="feathers-sdk-installer.nsi"/>
+				<include name="*.nsh"/>
+				<include name="*.bmp"/>
+			</fileset>
+		</copy>
+
+		<exec executable="${win.nsis}" dir="${output.path}" failonerror="true">
+			<arg value="/DVERSION=${version}"/>
+			<arg value="feathers-sdk-installer.nsi"/>
+		</exec>
+
+		<!-- the installer should be signed too -->
+		<exec executable="${win.signtool}" dir="${output.path}" failonerror="true">
+			<arg value="sign"/>
+			<arg value="/f"/>
+			<arg value="${air.certificate.path}"/>
+			<arg value="/p"/>
+			<arg value="${air.certificate.password}"/>
+			<arg value="FeathersSDKInstaller-${version}.exe"/>
+		</exec>
+
+		<!-- clean up -->
+		<delete includeemptydirs="true">
+			<fileset dir="${output.path}" casesensitive="false">
+				<exclude name="FeathersSDKInstaller-${version}.exe"/>
+			</fileset>
+		</delete>
 	</target>
 </project>
