@@ -1,5 +1,6 @@
 /*
-Copyright 2015 Joshua Tynjala
+Feathers SDK Installer
+Copyright 2015 Bowler Hat LLC
 Portions Copyright 2014 The Apache Software Foundation
 
 Licensed under the Apache License, Version 2.0 (the "License");
