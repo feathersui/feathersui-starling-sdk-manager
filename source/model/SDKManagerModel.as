@@ -1,5 +1,5 @@
 /*
-Feathers SDK Installer
+Feathers SDK Manager
 Copyright 2015 Bowler Hat LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@ package model
 	import flash.filesystem.File;
 	import flash.system.Capabilities;
 
-	public class InstallerModel
+	public class SDKManagerModel
 	{
 		private static const FEATHERS_SDK_LICENSE_NAME:String = "Feathers SDK";
 		private static const AIR_SDK_LICENSE_NAME:String = "Adobe AIR SDK";

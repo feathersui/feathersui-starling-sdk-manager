@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="feathers-sdk-installer" default="build" basedir=".">
+<project name="feathers-sdk-manager" default="build" basedir=".">
 	
 	<!-- build.local.properties and sdk.local.proprties are optional files that
 		can be used to override the default properties. -->
@@ -42,14 +42,14 @@
 		</condition>
 	</fail>
 
-	<target name="build" depends="-build-win,-build-mac" description="Builds the Feathers SDK installer for the current platform"/>
+	<target name="build" depends="-build-win,-build-mac" description="Builds the Feathers SDK Manager for the current platform"/>
 
 	<target name="-build-win" depends="-build-air-bundle,-prepare-bundle-win,-package-win" unless="is.mac"/>
 	<target name="-build-mac" depends="-build-air-bundle,-prepare-bundle-mac,-sign-mac,-package-mac" if="is.mac"/>
 
 	<target name="-prepare">
 		<delete dir="${output.path}"/>
-		<loadfile srcFile="${source.root}/FeathersSDKInstaller-app.xml" property="version">
+		<loadfile srcFile="${source.root}/FeathersSDKManager-app.xml" property="version">
 			<filterchain>
 				<linecontains>
 					<contains value="&lt;versionNumber&gt;"/>
@@ -63,7 +63,7 @@
 	</target>
 
 	<target name="-build-swf" depends="-prepare">
-		<echo message="Building FeathersSDKInstaller.swf"/>
+		<echo message="Building FeathersSDKManager.swf"/>
 		<java jar="${mxmlc}" dir="${basedir}" fork="true" failonerror="true">
 			<arg value="+flexlib"/>
 			<arg value="${frameworks.root}"/>
@@ -72,13 +72,13 @@
 			<arg value="-source-path+=${source.root}"/>
 			<arg value="-library-path+=${library.root}"/>
 			<arg value="-library-path+=${theme.root}"/>
-			<arg value="${source.root}/FeathersSDKInstaller.mxml"/>
-			<arg value="-output=${output.path}/FeathersSDKInstaller.swf"/>
+			<arg value="${source.root}/FeathersSDKManager.mxml"/>
+			<arg value="-output=${output.path}/FeathersSDKManager.swf"/>
 		</java>
 	</target>
 
 	<target name="-build-air-bundle" depends="-build-swf">
-		<echo message="Packaging FeathersSDKInstaller${bundle.extension}"/>
+		<echo message="Packaging ${bundle.name}${bundle.extension}"/>
 		<java jar="${adt}" dir="${basedir}" fork="true" failonerror="true">
 			<arg value="-package"/>
 			<arg value="-storetype"/>
@@ -89,8 +89,8 @@
 			<arg value="${air.certificate.password}"/>
 			<arg value="-target"/>
 			<arg value="bundle"/>
-			<arg value="${output.path}/FeathersSDKInstaller${bundle.extension}"/>
-			<arg value="${source.root}/FeathersSDKInstaller-app.xml"/>
+			<arg value="${output.path}/${bundle.name}${bundle.extension}"/>
+			<arg value="${source.root}/FeathersSDKManager-app.xml"/>
 			<arg value="-C"/>
 			<arg value="${icon.path}"/>
 			<arg line="icon16.png"/>
@@ -100,69 +100,73 @@
 			<arg line="icon512.png"/>
 			<arg value="-C"/>
 			<arg value="${output.path}"/>
-			<arg value="FeathersSDKInstaller.swf"/>
+			<arg value="FeathersSDKManager.swf"/>
 		</java>
 
 		<!-- we no longer need the SWF -->
-		<delete file="${output.path}/FeathersSDKInstaller.swf"/>
+		<delete file="${output.path}/FeathersSDKManager.swf"/>
 	</target>
 
 	<target name="-prepare-bundle-mac" if="is.mac">
 		<!-- these files are not required for this app -->
-		<delete dir="${output.path}/FeathersSDKInstaller${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/Flash Player.plugin"/>
-		<delete file="${output.path}/FeathersSDKInstaller${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/WebKit.dylib"/>
-		<delete file="${output.path}/FeathersSDKInstaller${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/Adobe AIR.vch"/>
-		<delete dir="${output.path}/FeathersSDKInstaller${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/AdobeCP15.plugin"/> 
+		<delete dir="${output.path}/${bundle.name}${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/Flash Player.plugin"/>
+		<delete file="${output.path}/${bundle.name}${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/WebKit.dylib"/>
+		<delete file="${output.path}/${bundle.name}${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/Adobe AIR.vch"/>
+		<delete dir="${output.path}/${bundle.name}${bundle.extension}/Contents/Frameworks/Adobe AIR.framework/Versions/1.0/Resources/AdobeCP15.plugin"/> 
 	</target>
 
 	<target name="-sign-mac" if="is.mac">
-		<echo message="Signing FeathersSDKInstaller${bundle.extension}"/>
+		<echo message="Signing ${bundle.name}${bundle.extension}"/>
 		<exec executable="${mac.codesign}">
 			<arg value="-f"/>
 			<arg value="-v"/>
 			<arg value="-s"/>
 			<arg value="${mac.application.certificate.name}"/>
-			<arg value="${output.path}/FeathersSDKInstaller${bundle.extension}/Contents/Frameworks/Adobe AIR.framework"/>
+			<arg value="${output.path}/${bundle.name}${bundle.extension}/Contents/Frameworks/Adobe AIR.framework"/>
 		</exec>
 		<exec executable="${mac.codesign}">
 			<arg value="-f"/>
 			<arg value="-v"/>
 			<arg value="-s"/>
 			<arg value="${mac.application.certificate.name}"/>
-			<arg value="${output.path}/FeathersSDKInstaller${bundle.extension}"/>
+			<arg value="${output.path}/${bundle.name}${bundle.extension}"/>
 		</exec>
-		<echo message="Verifying signature for FeathersSDKInstaller${bundle.extension}"/>
+		<echo message="Verifying signature for ${bundle.name}${bundle.extension}"/>
 		<exec executable="${mac.spctl}">
 			<arg value="--assess"/>
 			<arg value="--type"/>
 			<arg value="execute"/>
-			<arg value="${output.path}/FeathersSDKInstaller${bundle.extension}"/>
+			<arg value="${output.path}/${bundle.name}${bundle.extension}"/>
 		</exec>
 	</target>
 
 	<target name="-package-mac" if="is.mac">
 		<exec executable="${mac.productbuild}">
 			<arg value="--component"/>
-			<arg value="${output.path}/FeathersSDKInstaller${bundle.extension}"/>
+			<arg value="${output.path}/${bundle.name}${bundle.extension}"/>
 			<arg value="/Applications"/>
 			<arg value="--sign"/>
 			<arg value="${mac.installer.certificate.name}"/>
-			<arg value="${output.path}/FeathersSDKInstaller.pkg"/>
+			<arg value="${output.path}/FeathersSDKManagerInstaller-${version}.pkg"/>
 		</exec>
 
 		<!-- clean up -->
-		<delete dir="${output.path}/FeathersSDKInstaller${bundle.extension}"/>
+		<delete includeemptydirs="true" removeNotFollowedSymlinks="true">
+			<fileset dir="${output.path}" casesensitive="false" followsymlinks="false">
+				<exclude name="FeathersSDKManagerInstaller-${version}.pkg"/>
+			</fileset>
+		</delete>
 	</target>
 
 	<target name="-prepare-bundle-win" unless="is.mac">
 		<!-- remove unneeded WebKit and DRM files -->
-		<delete dir="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/WebKit"/>
-		<delete file="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/WebKit.dll"/>
-		<delete file="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/NPSWF32.dll"/>
-		<delete file="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/AdobeCP15.dll"/>
-		<delete file="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/adobecp.vch"/>
-		<delete file="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/AdobeCP.dll"/>
-		<delete file="${output.path}/FeathersSDKInstaller/Adobe AIR/Versions/1.0/Resources/Adobe AIR.vch"/>
+		<delete dir="${output.path}/${bundle.name}/Adobe AIR/Versions/1.0/Resources/WebKit"/>
+		<delete file="${output.path}/${bundle.name}/Adobe AIR/Versions/1.0/Resources/WebKit.dll"/>
+		<delete file="${output.path}/${bundle.name}/Adobe AIR/Versions/1.0/Resources/NPSWF32.dll"/>
+		<delete file="${output.path}/${bundle.name}/Adobe AIR/Versions/1.0/Resources/AdobeCP15.dll"/>
+		<delete file="${output.path}/${bundle.name}/Adobe AIR/Versions/1.0/Resources/adobecp.vch"/>
+		<delete file="${output.path}/${bundle.name}/Adobe AIR/Versions/1.0/Resources/AdobeCP.dll"/>
+		<delete file="${output.path}/${bundle.name}/Adobe AIR/Versions/1.0/Resources/Adobe AIR.vch"/>
 	</target>
 
 	<target name="-package-win" unless="is.mac">
@@ -170,7 +174,7 @@
 			that location. -->
 		<copy todir="${output.path}">
 			<fileset dir="${basedir}/nsis">
-				<include name="feathers-sdk-installer.nsi"/>
+				<include name="feathers-sdk-manager.nsi"/>
 				<include name="*.nsh"/>
 				<include name="*.bmp"/>
 			</fileset>
@@ -178,7 +182,7 @@
 
 		<exec executable="${win.nsis}" dir="${output.path}" failonerror="true">
 			<arg value="/DVERSION=${version}"/>
-			<arg value="feathers-sdk-installer.nsi"/>
+			<arg value="feathers-sdk-manager.nsi"/>
 		</exec>
 
 		<!-- the installer should be signed too -->
@@ -188,13 +192,13 @@
 			<arg value="${air.certificate.path}"/>
 			<arg value="/p"/>
 			<arg value="${air.certificate.password}"/>
-			<arg value="FeathersSDKInstaller-${version}.exe"/>
+			<arg value="FeathersSDKManagerInstaller-${version}.exe"/>
 		</exec>
 
 		<!-- clean up -->
-		<delete includeemptydirs="true">
-			<fileset dir="${output.path}" casesensitive="false">
-				<exclude name="FeathersSDKInstaller-${version}.exe"/>
+		<delete includeemptydirs="true" removeNotFollowedSymlinks="true">
+			<fileset dir="${output.path}" casesensitive="false" followsymlinks="false">
+				<exclude name="FeathersSDKManagerInstaller-${version}.exe"/>
 			</fileset>
 		</delete>
 	</target>

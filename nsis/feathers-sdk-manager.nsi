@@ -12,24 +12,24 @@
 ;General
 
 	;Name and file
-	Name "Feathers SDK Installer"
-	OutFile "FeathersSDKInstaller-${VERSION}.exe"
+	Name "Feathers SDK Manager"
+	OutFile "FeathersSDKManagerInstaller-${VERSION}.exe"
 
 	;Default installation folder
-	InstallDir "$PROGRAMFILES\Feathers SDK Installer"
+	InstallDir "$PROGRAMFILES\Feathers SDK Manager"
 	
 	;Get installation folder from registry if available
-	InstallDirRegKey HKCU "Software\FeathersSDKInstaller" ""
+	InstallDirRegKey HKCU "Software\FeathersSDKManager" ""
 
 	;Request application privileges for Windows Vista and higher
 	RequestExecutionLevel admin
 	
 Function .onInit
-	ReadRegStr $R0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller" \
+	ReadRegStr $R0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"UninstallString"
 	StrCmp $R0 "" done
 	MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
-		"Setup has detected that another version of Feathers SDK Installer is already installed. \
+		"Setup has detected that another version of Feathers SDK Manager is already installed. \
 		Choose $\"OK$\" to remove the previous version or $\"Cancel$\" to cancel this upgrade." \
 		IDOK run_uninstaller
 		Abort
@@ -57,8 +57,8 @@ FunctionEnd
 	!define MUI_HEADERIMAGE
 	!define MUI_HEADERIMAGE_BITMAP "header.bmp"
 	!define MUI_WELCOMEFINISHPAGE_BITMAP "wizard.bmp"
-	!define MUI_FINISHPAGE_RUN "$INSTDIR\Feathers SDK Installer.exe"
-	!define MUI_FINISHPAGE_RUN_TEXT "Run Feathers SDK Installer"
+	!define MUI_FINISHPAGE_RUN "$INSTDIR\Feathers SDK Manager.exe"
+	!define MUI_FINISHPAGE_RUN_TEXT "Run Feathers SDK Manager"
 	!define MUI_FINISHPAGE_NOAUTOCLOSE
 	!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\orange-install.ico"
 	!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
@@ -83,62 +83,62 @@ FunctionEnd
 ;--------------------------------
 ;Installer Sections
 
-Section "FeathersSDKInstaller" SecFeathersSDKInstaller
+Section "FeathersSDKManager" SecFeathersSDKManager
 
 	;copy all files
 	SetOutPath "$INSTDIR"
-	File "FeathersSDKInstaller\Feathers SDK Installer.exe"
-	File "FeathersSDKInstaller\FeathersSDKInstaller.swf"
-	File "FeathersSDKInstaller\mimetype"
-	File "FeathersSDKInstaller\icon16.png"
-	File "FeathersSDKInstaller\icon32.png"
-	File "FeathersSDKInstaller\icon48.png"
-	File "FeathersSDKInstaller\icon128.png"
-	File "FeathersSDKInstaller\icon512.png"
+	File "Feathers SDK Manager\Feathers SDK Manager.exe"
+	File "Feathers SDK Manager\FeathersSDKManager.swf"
+	File "Feathers SDK Manager\mimetype"
+	File "Feathers SDK Manager\icon16.png"
+	File "Feathers SDK Manager\icon32.png"
+	File "Feathers SDK Manager\icon48.png"
+	File "Feathers SDK Manager\icon128.png"
+	File "Feathers SDK Manager\icon512.png"
 	SetOutPath "$INSTDIR\META-INF"
-	File "FeathersSDKInstaller\META-INF\signatures.xml"
+	File "Feathers SDK Manager\META-INF\signatures.xml"
 	SetOutPath "$INSTDIR\META-INF\AIR"
-	File "FeathersSDKInstaller\META-INF\AIR\application.xml"
-	File "FeathersSDKInstaller\META-INF\AIR\hash"
+	File "Feathers SDK Manager\META-INF\AIR\application.xml"
+	File "Feathers SDK Manager\META-INF\AIR\hash"
 	SetOutPath "$INSTDIR\Adobe AIR\Versions\1.0"
-	File "FeathersSDKInstaller\Adobe AIR\Versions\1.0\Adobe AIR.dll"
+	File "Feathers SDK Manager\Adobe AIR\Versions\1.0\Adobe AIR.dll"
 	SetOutPath "$INSTDIR\Adobe AIR\Versions\1.0\Resources"
-	File "FeathersSDKInstaller\Adobe AIR\Versions\1.0\Resources\CaptiveAppEntry.exe"
+	File "Feathers SDK Manager\Adobe AIR\Versions\1.0\Resources\CaptiveAppEntry.exe"
 	
 	;Store installation folder
-	WriteRegStr HKCU "Software\FeathersSDKInstaller" "" $INSTDIR
+	WriteRegStr HKCU "Software\FeathersSDKManager" "" $INSTDIR
 	
 	;Create uninstaller
 	WriteUninstaller "$INSTDIR\uninstall.exe"
 	
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller" \
-		"DisplayName" "Feathers SDK Installer"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller" \
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
+		"DisplayName" "Feathers SDK Manager"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"Publisher" "Bowler Hat LLC"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller" \
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"URLInfoAbout" "http://feathersui.com/sdk/"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller" \
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"DisplayVersion" "${VERSION}"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller" \
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"HelpLink" "http://feathersui.com/help/sdk/"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller" \
-		"DisplayIcon" "$\"$INSTDIR\Feathers SDK Installer.exe$\""
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller" \
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
+		"DisplayIcon" "$\"$INSTDIR\Feathers SDK Manager.exe$\""
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"UninstallString" "$\"$INSTDIR\uninstall.exe$\""
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller" \
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
-	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller" \
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"NoModify" 0x1
-	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller" \
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"NoRepair" 0x1
 	
 	${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
 	IntFmt $0 "0x%08X" $0
-	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller" \
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"EstimatedSize" "$0"
 	
 	;Create Start Menu entry
-	CreateShortCut "$SMPROGRAMS\Feathers SDK Installer.lnk" "$INSTDIR\Feathers SDK Installer.exe"
+	CreateShortCut "$SMPROGRAMS\Feathers SDK Manager.lnk" "$INSTDIR\Feathers SDK Manager.exe"
 
 SectionEnd
 
@@ -147,8 +147,8 @@ SectionEnd
 
 Section "Uninstall"
 
-	Delete "$INSTDIR\Feathers SDK Installer.exe"
-	Delete "$INSTDIR\FeathersSDKInstaller.swf"
+	Delete "$INSTDIR\Feathers SDK Manager.exe"
+	Delete "$INSTDIR\FeathersSDKManager.swf"
 	Delete "$INSTDIR\mimetype"
 	Delete "$INSTDIR\icon16.png"
 	Delete "$INSTDIR\icon32.png"
@@ -169,9 +169,9 @@ Section "Uninstall"
 	RMDir "$INSTDIR\Adobe AIR\"
 	RMDir "$INSTDIR"
 	
-	Delete "$SMPROGRAMS\Feathers SDK Installer.lnk"
+	Delete "$SMPROGRAMS\Feathers SDK Manager.lnk"
 	
-	DeleteRegKey /ifempty HKCU "Software\FeathersSDKInstaller"
+	DeleteRegKey /ifempty HKCU "Software\FeathersSDKManager"
 	
-	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKInstaller"
+	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager"
 SectionEnd

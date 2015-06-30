@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <application xmlns="http://ns.adobe.com/air/application/18.0">
-	<id>com.feathersui.FeathersSDKInstaller</id>
-	<filename>Feathers SDK Installer</filename>
-	<name>Feathers SDK Installer</name>
+	<id>com.feathersui.FeathersSDKManager</id>
+	<filename>Feathers SDK Manager</filename>
+	<name>Feathers SDK Manager</name>
 	<versionNumber>1.0.0</versionNumber>
-	<description>Installs and configures the Feathers SDK and its dependencies.</description>
+	<description>Downloads and manages the Feathers SDK and its dependencies.</description>
 	<copyright>2015 Bowler Hat LLC</copyright>
 
 	<initialWindow>
-		<content>FeathersSDKInstaller.swf</content>
-		<title>Feathers SDK Installer</title>
+		<content>FeathersSDKManager.swf</content>
+		<title>Feathers SDK Manager</title>
 		<systemChrome>standard</systemChrome>
 		<visible>true</visible>
 		<minimizable>true</minimizable>

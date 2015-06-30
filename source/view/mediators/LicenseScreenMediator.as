@@ -1,5 +1,5 @@
 /*
-Feathers SDK Installer
+Feathers SDK Manager
 Copyright 2015 Bowler Hat LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@ limitations under the License.
 */
 package view.mediators
 {
-	import model.InstallerModel;
+	import model.SDKManagerModel;
 
 	import org.robotlegs.starling.mvcs.Mediator;
 
@@ -32,20 +32,20 @@ package view.mediators
 		public var screen:LicenseScreen;
 		
 		[Inject]
-		public var installerModel:InstallerModel;
+		public var sdkManagerModel:SDKManagerModel;
 		
 		[Inject]
-		public var binaryService:IAcquireProductService;
+		public var productService:IAcquireProductService;
 		
 		override public function onRegister():void
 		{
-			this.screen.licenses = this.installerModel.licenses;
+			this.screen.licenses = this.sdkManagerModel.licenses;
 			this.addViewListener(Event.COMPLETE, view_completeHandler);
 		}
 		
 		private function view_completeHandler(event:Event):void
 		{
-			this.binaryService.acquireSelectedProduct();
+			this.productService.acquireSelectedProduct();
 		}
 	}
 }

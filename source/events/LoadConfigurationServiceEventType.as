@@ -1,5 +1,5 @@
 /*
-Feathers SDK Installer
+Feathers SDK Manager
 Copyright 2015 Bowler Hat LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");

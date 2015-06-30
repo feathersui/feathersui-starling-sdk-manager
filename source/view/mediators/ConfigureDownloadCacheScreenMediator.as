@@ -1,5 +1,5 @@
 /*
-Feathers SDK Installer
+Feathers SDK Manager
 Copyright 2015 Bowler Hat LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@ limitations under the License.
 */
 package view.mediators
 {
-	import model.InstallerModel;
+	import model.SDKManagerModel;
 
 	import org.robotlegs.starling.mvcs.Mediator;
 
@@ -27,7 +27,7 @@ package view.mediators
 	public class ConfigureDownloadCacheScreenMediator extends Mediator
 	{
 		[Inject]
-		public var installerModel:InstallerModel;
+		public var sdkManagerModel:SDKManagerModel;
 		
 		[Inject]
 		public var screen:ConfigureDownloadCacheScreen;
@@ -36,15 +36,15 @@ package view.mediators
 		{
 			//since the user may navigate back, we may need to repopulate the
 			//appropriate fields in this screen.
-			this.screen.downloadCacheEnabled = this.installerModel.downloadCacheEnabled;
-			this.screen.downloadCacheDirectory = this.installerModel.downloadCacheDirectory;
+			this.screen.downloadCacheEnabled = this.sdkManagerModel.downloadCacheEnabled;
+			this.screen.downloadCacheDirectory = this.sdkManagerModel.downloadCacheDirectory;
 			this.addViewListener(Event.COMPLETE, view_completeHandler);
 		}
 		
 		private function view_completeHandler(event:Event):void
 		{
-			this.installerModel.downloadCacheEnabled = this.screen.downloadCacheEnabled;
-			this.installerModel.downloadCacheDirectory = this.screen.downloadCacheDirectory;
+			this.sdkManagerModel.downloadCacheEnabled = this.screen.downloadCacheEnabled;
+			this.sdkManagerModel.downloadCacheDirectory = this.screen.downloadCacheDirectory;
 		}
 	}
 }

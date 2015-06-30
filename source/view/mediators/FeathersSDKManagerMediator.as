@@ -1,5 +1,5 @@
 /*
-Feathers SDK Installer
+Feathers SDK Manager
 Copyright 2015 Bowler Hat LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,7 @@ package view.mediators
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
 
-	import model.InstallerModel;
+	import model.SDKManagerModel;
 
 	import org.robotlegs.starling.mvcs.Mediator;
 
@@ -41,15 +41,15 @@ package view.mediators
 	import starling.core.Starling;
 	import starling.events.Event;
 
-	public class FeathersSDKInstallerMediator extends Mediator
+	public class FeathersSDKManagerMediator extends Mediator
 	{
 		private static const NO_ACTIVE_NETWORK_ERROR:String = "Cannot install the Feathers SDK at this time. Please check your Internet connection.";
 		
 		[Inject]
-		public var navigator:FeathersSDKInstaller;
+		public var navigator:FeathersSDKManager;
 		
 		[Inject]
-		public var installerModel:InstallerModel;
+		public var sdkManagerModel:SDKManagerModel;
 		
 		[Inject]
 		public var installerService:IRunInstallerScriptService;
@@ -86,7 +86,7 @@ package view.mediators
 			{
 				var item:StackScreenNavigatorItem = this.navigator.installError;
 				item.properties.errorMessage = NO_ACTIVE_NETWORK_ERROR;
-				this.navigator.rootScreenID = FeathersSDKInstaller.SCREEN_ID_INSTALL_ERROR;
+				this.navigator.rootScreenID = FeathersSDKManager.SCREEN_ID_INSTALL_ERROR;
 			}
 		}
 		
@@ -103,7 +103,7 @@ package view.mediators
 			this._contextMenu.hideBuiltInItems();
 			
 			var downloadCacheMenuItem:ContextMenuItem = new ContextMenuItem("Configure Download Cache...");
-			downloadCacheMenuItem.checked = this.installerModel.downloadCacheEnabled;
+			downloadCacheMenuItem.checked = this.sdkManagerModel.downloadCacheEnabled;
 			downloadCacheMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, downloadCacheMenuItem_menuItemSelectHandler);
 			this._contextMenu.customItems.push(downloadCacheMenuItem);
 			
@@ -130,7 +130,7 @@ package view.mediators
 		
 		private function nativeStage_rightMouseDownHandler(event:MouseEvent):void
 		{
-			if(!this._allowContextMenu || this.navigator.activeScreenID === FeathersSDKInstaller.SCREEN_ID_DOWNLOAD_CACHE)
+			if(!this._allowContextMenu || this.navigator.activeScreenID === FeathersSDKManager.SCREEN_ID_DOWNLOAD_CACHE)
 			{
 				return;
 			}
@@ -139,7 +139,7 @@ package view.mediators
 		
 		private function nativeWindow_closingHandler(event:flash.events.Event):void
 		{
-			if(this.navigator.activeScreenID == FeathersSDKInstaller.SCREEN_ID_INSTALL_PROGRESS)
+			if(this.navigator.activeScreenID == FeathersSDKManager.SCREEN_ID_INSTALL_PROGRESS)
 			{
 				//we don't want to interrupt the installation
 				event.preventDefault();
@@ -150,26 +150,26 @@ package view.mediators
 		{
 			var item:StackScreenNavigatorItem = this.navigator.installError;
 			item.properties.errorMessage = errorMessage;
-			this.navigator.rootScreenID = FeathersSDKInstaller.SCREEN_ID_INSTALL_ERROR;
+			this.navigator.rootScreenID = FeathersSDKManager.SCREEN_ID_INSTALL_ERROR;
 		}
 		
 		private function context_loadConfigurationCompleteHandler(event:starling.events.Event):void
 		{
 			this._allowContextMenu = true;
-			this.navigator.rootScreenID = FeathersSDKInstaller.SCREEN_ID_CHOOSE_PRODUCT;
+			this.navigator.rootScreenID = FeathersSDKManager.SCREEN_ID_CHOOSE_PRODUCT;
 		}
 		
 		private function context_acquireBinaryDistributionStartHandler(event:starling.events.Event):void
 		{
 			this._allowContextMenu = false;
-			this.navigator.pushScreen(FeathersSDKInstaller.SCREEN_ID_INSTALL_PROGRESS);
+			this.navigator.pushScreen(FeathersSDKManager.SCREEN_ID_INSTALL_PROGRESS);
 		}
 		
 		private function context_acquireBinaryDistributionErrorHandler(event:starling.events.Event, errorMessage:String):void
 		{
 			var item:StackScreenNavigatorItem = this.navigator.installError;
 			item.properties.errorMessage = errorMessage;
-			this.navigator.pushScreen(FeathersSDKInstaller.SCREEN_ID_INSTALL_ERROR);
+			this.navigator.pushScreen(FeathersSDKManager.SCREEN_ID_INSTALL_ERROR);
 		}
 		
 		private function context_acquireBinaryDistributionCompleteHandler(event:starling.events.Event):void
@@ -179,25 +179,25 @@ package view.mediators
 		
 		private function context_runInstallerScriptStartHandler(event:starling.events.Event):void
 		{
-			this.navigator.pushScreen(FeathersSDKInstaller.SCREEN_ID_INSTALL_PROGRESS);
+			this.navigator.pushScreen(FeathersSDKManager.SCREEN_ID_INSTALL_PROGRESS);
 		}
 		
 		private function context_runInstallerScriptErrorHandler(event:starling.events.Event, errorMessage:String):void
 		{
 			var item:StackScreenNavigatorItem = this.navigator.installError;
 			item.properties.errorMessage = errorMessage;
-			this.navigator.pushScreen(FeathersSDKInstaller.SCREEN_ID_INSTALL_ERROR);
+			this.navigator.pushScreen(FeathersSDKManager.SCREEN_ID_INSTALL_ERROR);
 		}
 		
 		private function context_runInstallerScriptCompleteHandler(event:starling.events.Event):void
 		{
-			this.navigator.pushScreen(FeathersSDKInstaller.SCREEN_ID_INSTALL_COMPLETE);
+			this.navigator.pushScreen(FeathersSDKManager.SCREEN_ID_INSTALL_COMPLETE);
 		}
 		
 		private function downloadCacheMenuItem_menuItemSelectHandler(event:ContextMenuEvent):void
 		{
 			var menuItem:ContextMenuItem = ContextMenuItem(event.currentTarget);
-			this.navigator.pushScreen(FeathersSDKInstaller.SCREEN_ID_DOWNLOAD_CACHE);
+			this.navigator.pushScreen(FeathersSDKManager.SCREEN_ID_DOWNLOAD_CACHE);
 		}
 	}
 }

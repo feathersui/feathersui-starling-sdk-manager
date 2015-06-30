@@ -1,5 +1,5 @@
 /*
-Feathers SDK Installer
+Feathers SDK Manager
 Copyright 2015 Bowler Hat LLC
 Portions Copyright 2014 The Apache Software Foundation
 
@@ -38,7 +38,7 @@ package services
 	import flash.system.Capabilities;
 	import flash.utils.ByteArray;
 
-	import model.InstallerModel;
+	import model.SDKManagerModel;
 	import model.ProductConfigurationItem;
 
 	import org.as3commons.zip.Zip;
@@ -57,7 +57,7 @@ package services
 		private static const DECOMPRESS_PROGRESS_LABEL:String = "Decompressing Feathers SDK...";
 		
 		[Inject]
-		public var installerModel:InstallerModel;
+		public var sdkManagerModel:SDKManagerModel;
 		
 		private var _process:NativeProcess;
 		private var _tempDirectory:File;
@@ -80,7 +80,7 @@ package services
 				return;
 			}
 			
-			if(this.installerModel.selectedProduct === null)
+			if(this.sdkManagerModel.selectedProduct === null)
 			{
 				this.dispatchWith(AcquireProductServiceEventType.ERROR, false, NO_PRODUCT_SELECTED_ERROR);
 				return;
@@ -88,7 +88,7 @@ package services
 			
 			this._tempDirectory = File.createTempDirectory();
 			
-			if(this.installerModel.downloadCacheEnabled)
+			if(this.sdkManagerModel.downloadCacheEnabled)
 			{
 				var cacheFile:File = this.getProductCacheFile();
 				//we can skip downloading this file because it's already
@@ -117,9 +117,9 @@ package services
 		
 		private function getProductFileName():String
 		{
-			var selectedProduct:ProductConfigurationItem = this.installerModel.selectedProduct;
+			var selectedProduct:ProductConfigurationItem = this.sdkManagerModel.selectedProduct;
 			var extension:String = ".tar.gz";
-			if(this.installerModel.operatingSystem == InstallerModel.OPERATING_SYSTEM_WINDOWS)
+			if(this.sdkManagerModel.operatingSystem == SDKManagerModel.OPERATING_SYSTEM_WINDOWS)
 			{
 				extension = ".zip";
 			}
@@ -128,7 +128,7 @@ package services
 		
 		private function getProductURL():String
 		{
-			var selectedProduct:ProductConfigurationItem = this.installerModel.selectedProduct;
+			var selectedProduct:ProductConfigurationItem = this.sdkManagerModel.selectedProduct;
 			return selectedProduct.path + this.getProductFileName();
 		}
 		
@@ -140,12 +140,12 @@ package services
 			c = url.indexOf("/", c + 1);
 			// that should find the slash after the server.
 			url = url.substr(c + 1);
-			return this.installerModel.downloadCacheDirectory.resolvePath(escape(url));
+			return this.sdkManagerModel.downloadCacheDirectory.resolvePath(escape(url));
 		}
 		
 		private function saveProductFile(bytes:ByteArray):void
 		{	
-			var selectedProduct:ProductConfigurationItem = this.installerModel.selectedProduct;
+			var selectedProduct:ProductConfigurationItem = this.sdkManagerModel.selectedProduct;
 			var binaryDistribution:File = this._tempDirectory.resolvePath(this.getProductFileName());
 			if(binaryDistribution.exists)
 			{
@@ -157,7 +157,7 @@ package services
 			stream.writeBytes(bytes);
 			stream.close();
 			
-			if(!this.installerModel.downloadCacheEnabled)
+			if(!this.sdkManagerModel.downloadCacheEnabled)
 			{
 				return;
 			}
@@ -173,7 +173,7 @@ package services
 			
 		private function decompress():void
 		{
-			var selectedProduct:ProductConfigurationItem = this.installerModel.selectedProduct;
+			var selectedProduct:ProductConfigurationItem = this.sdkManagerModel.selectedProduct;
 			var binaryDistribution:File = this._tempDirectory.resolvePath(this.getProductFileName());
 			if(!binaryDistribution.exists)
 			{
@@ -181,7 +181,7 @@ package services
 				this.cleanup();
 				return;
 			}
-			if(this.installerModel.operatingSystem == InstallerModel.OPERATING_SYSTEM_WINDOWS) //zip
+			if(this.sdkManagerModel.operatingSystem == SDKManagerModel.OPERATING_SYSTEM_WINDOWS) //zip
 			{
 				this._unzipDirectory = this._tempDirectory.resolvePath(selectedProduct.file);
 				this._unzipDirectory.createDirectory();
@@ -215,7 +215,7 @@ package services
 					} 
 					catch(error:Error) 
 					{
-						trace("Installer error: cannot delete temporary directory.");
+						trace("SDK Manager error: cannot delete temporary directory.");
 					}
 				}
 				this._tempDirectory = null;
@@ -331,7 +331,7 @@ package services
 				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, BINARY_DISTRIBUTION_NOT_FOUND_ERROR);
 				return;
 			}
-			var installDirectory:File = this.installerModel.installDirectory;
+			var installDirectory:File = this.sdkManagerModel.installDirectory;
 			var files:Array = this._unzipDirectory.getDirectoryListing();
 			for each(var file:File in files)
 			{

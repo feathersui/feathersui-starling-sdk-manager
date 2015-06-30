@@ -1,5 +1,5 @@
 /*
-Feathers SDK Installer
+Feathers SDK Manager
 Copyright 2015 Bowler Hat LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,7 @@ package view.mediators
 		public var installerService:IRunInstallerScriptService;
 		
 		[Inject]
-		public var binaryService:IAcquireProductService;
+		public var productService:IAcquireProductService;
 		
 		override public function onRegister():void
 		{
@@ -56,7 +56,7 @@ package view.mediators
 		
 		private function updateTitle():void
 		{
-			if(this.binaryService.isActive)
+			if(this.productService.isActive)
 			{
 				this.screen.progressTitle = ACQUIRE_BINARY_DISTRIBUTION_TITLE;
 			}

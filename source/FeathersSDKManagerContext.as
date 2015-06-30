@@ -1,5 +1,5 @@
 /*
-Feathers SDK Installer
+Feathers SDK Manager
 Copyright 2015 Bowler Hat LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@ limitations under the License.
 */
 package
 {
-	import model.InstallerModel;
+	import model.SDKManagerModel;
 
 	import org.robotlegs.starling.base.ContextEventType;
 	import org.robotlegs.starling.mvcs.Context;
@@ -40,27 +40,27 @@ package
 	import view.mediators.ChooseProductScreenMediator;
 	import view.mediators.ChooseRuntimeScreenMediator;
 	import view.mediators.ConfigureDownloadCacheScreenMediator;
-	import view.mediators.FeathersSDKInstallerMediator;
+	import view.mediators.FeathersSDKManagerMediator;
 	import view.mediators.InstallCompleteScreenMediator;
 	import view.mediators.InstallErrorScreenMediator;
 	import view.mediators.InstallProgressScreenMediator;
 	import view.mediators.LicenseScreenMediator;
 
-	public class FeathersSDKInstallerContext extends Context
+	public class FeathersSDKManagerContext extends Context
 	{
-		public function FeathersSDKInstallerContext(view:FeathersSDKInstaller = null)
+		public function FeathersSDKManagerContext(view:FeathersSDKManager = null)
 		{
 			super(view);
 		}
 		
 		override public function startup():void
 		{	
-			this.injector.mapSingleton(InstallerModel);
+			this.injector.mapSingleton(SDKManagerModel);
 			this.injector.mapSingletonOf(ILoadConfigurationService, LoadConfigurationService);
 			this.injector.mapSingletonOf(IAcquireProductService, AcquireProductService);
 			this.injector.mapSingletonOf(IRunInstallerScriptService, RunInstallerScriptService);
 			
-			this.mediatorMap.mapView(FeathersSDKInstaller, FeathersSDKInstallerMediator);
+			this.mediatorMap.mapView(FeathersSDKManager, FeathersSDKManagerMediator);
 			this.mediatorMap.mapView(ChooseProductScreen, ChooseProductScreenMediator);
 			this.mediatorMap.mapView(ChooseRuntimeScreen, ChooseRuntimeScreenMediator);
 			this.mediatorMap.mapView(ChooseInstallDirectoryScreen, ChooseInstallDirectoryScreenMediator);

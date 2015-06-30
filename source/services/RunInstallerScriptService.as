@@ -1,5 +1,5 @@
 /*
-Feathers SDK Installer
+Feathers SDK Manager
 Copyright 2015 Bowler Hat LLC
 Portions Copyright 2014 The Apache Software Foundation
 
@@ -24,7 +24,7 @@ package services
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 
-	import model.InstallerModel;
+	import model.SDKManagerModel;
 	import model.RuntimeConfigurationItem;
 
 	import org.apache.flex.ant.Ant;
@@ -48,7 +48,7 @@ package services
 		private static const CHECKSUM_TASK_PROGRESS_LABEL:String = "Verifying checksum...";
 		
 		[Inject]
-		public var installerModel:InstallerModel;
+		public var sdkManagerModel:SDKManagerModel;
 		
 		private var _ant:Ant;
 		
@@ -67,14 +67,14 @@ package services
 				return;
 			}
 			
-			if(this.installerModel.selectedRuntime === null)
+			if(this.sdkManagerModel.selectedRuntime === null)
 			{
 				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, NO_RUNTIME_SELECTED_ERROR);
 				return;
 			}
 			
 			this._ant = new Ant();
-			var installDirectory:File = this.installerModel.installDirectory;
+			var installDirectory:File = this.sdkManagerModel.installDirectory;
 			var installerScriptFile:File = installDirectory.resolvePath("installer.xml");
 			Starling.current.stage.addEventListener(starling.events.Event.ENTER_FRAME, enterFrameHandler);
 			var context:Object =
@@ -85,14 +85,14 @@ package services
 				"do.swfobject.install": true
 			};
 			
-			var downloadCacheEnabled:Boolean = this.installerModel.downloadCacheEnabled;
+			var downloadCacheEnabled:Boolean = this.sdkManagerModel.downloadCacheEnabled;
 			if(downloadCacheEnabled)
 			{
 				context["usingDownloadCache"] = downloadCacheEnabled;
-				context["downloadCacheFolder"] = this.installerModel.downloadCacheDirectory.nativePath;
+				context["downloadCacheFolder"] = this.sdkManagerModel.downloadCacheDirectory.nativePath;
 			}
 			
-			var selectedRuntime:RuntimeConfigurationItem = this.installerModel.selectedRuntime;
+			var selectedRuntime:RuntimeConfigurationItem = this.sdkManagerModel.selectedRuntime;
 			context["air.sdk.version"] = selectedRuntime.airVersionNumber;
 			context["flash.sdk.version"] = selectedRuntime.playerGlobalVersionNumber;
 			
@@ -114,7 +114,7 @@ package services
 			{
 				//delete the files that we put in the installation directory
 				//because the SDK will be in a bad state.
-				var installDirectory:File = this.installerModel.installDirectory;
+				var installDirectory:File = this.sdkManagerModel.installDirectory;
 				if(installDirectory.exists && installDirectory.isDirectory)
 				{
 					var files:Array = installDirectory.getDirectoryListing();
@@ -151,7 +151,7 @@ package services
 				{
 					this.cleanupInstallation(!Ant.currentAnt.project.status);
 					this.dispatchWith(RunInstallScriptServiceEventType.COMPLETE);
-					//tracker.trackInstallerSuccess(APACHE_FLEX_BIN_DISTRO_VERSION_DISPLAY, APACHE_FLEX_BIN_DISTRO_VERSION, _os.os);
+					//success!
 				}
 				var failureMessage:String = Ant.currentAnt.project.failureMessage;
 				if(failureMessage)

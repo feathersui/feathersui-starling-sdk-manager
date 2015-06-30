@@ -1,5 +1,5 @@
 /*
-Feathers SDK Installer
+Feathers SDK Manager
 Copyright 2015 Bowler Hat LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@ package services
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 
-	import model.InstallerModel;
+	import model.SDKManagerModel;
 
 	import org.robotlegs.starling.mvcs.Actor;
 
@@ -38,10 +38,10 @@ package services
 		
 		private static const LOAD_PROGRESS_LABEL:String = "Loading configuration data...";
 		
-		public static const CONFIGURATION_URL:String = "http://feathersui.com/sdk/installer/sdk-installer-config-1.0.xml";
+		public static const CONFIGURATION_URL:String = "http://feathersui.com/sdk/feathers-sdk-manager/sdk-manager-config-1.0.xml";
 		
 		[Inject]
-		public var installerModel:InstallerModel;
+		public var sdkManagerModel:SDKManagerModel;
 		
 		private var _loader:URLLoader;
 		
@@ -83,7 +83,7 @@ package services
 			try
 			{
 				var xml:XML = new XML(this._loader.data);
-				this.installerModel.parseConfiguration(xml);
+				this.sdkManagerModel.parseConfiguration(xml);
 			} 
 			catch(error:Error) 
 			{

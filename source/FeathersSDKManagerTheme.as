@@ -1,5 +1,5 @@
 /*
-Feathers SDK Installer
+Feathers SDK Manager
 Copyright 2015 Bowler Hat LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@ package
 
 	import utils.CustomStyleNames;
 
-	public class FeathersSDKInstallerTheme extends MetalWorksDesktopTheme
+	public class FeathersSDKManagerTheme extends MetalWorksDesktopTheme
 	{
 		[Embed(source="/../assets/images/feathers-sdk-logo.png")]
 		private static const FEATHERS_SDK_LOGO:Class;
@@ -40,7 +40,7 @@ package
 		
 		private static const ICON_SIZE:int = 160;
 		
-		public function FeathersSDKInstallerTheme()
+		public function FeathersSDKManagerTheme()
 		{
 			super();
 		}
