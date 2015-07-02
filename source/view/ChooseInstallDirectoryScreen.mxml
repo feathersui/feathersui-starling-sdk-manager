@@ -82,16 +82,33 @@ limitations under the License.
 	</f:Header>
 	
 	<fx:Script><![CDATA[
+		import flash.events.Event;
+		
 		import feathers.controls.Alert;
 		import feathers.controls.Button;
 		import feathers.controls.Label;
 		import feathers.data.ListCollection;
 		
-		import flash.events.Event;
-
 		import starling.events.Event;
-
+		
 		import utils.CustomStyleNames;
+		
+		/**
+		 * These files may be ignored if they exist when checking if the install
+		 * directory is empty.
+		 */
+		private static const ALLOWED_FILE_NAMES:Vector.<String> = new <String>
+		[
+			//mac saves settings for how to display a directory in this file
+			".DS_Store",
+			//windows saves settings for how to display a directory in this file
+			"desktop.ini",
+			//some versions of windows saves image thumbnails in this file
+			"Thumbs.db",
+			//may be provided to customize SDK install settings
+			"local.properties"
+		];
+			
 
 		private var _tempInstallDirectory:File;
 
@@ -134,20 +151,14 @@ limitations under the License.
 			var result:Boolean;
 
 			var filesArray:Array = dir.getDirectoryListing();
-
-			var length:int = filesArray.length;
-			result = length == 0;
-			if(length == 1)
+			for each(var file:File in filesArray)
 			{
-				var explodedPath:Array = File(filesArray[0]).url.split("/");
-
-				// the .DS_Store file doesn't bother anybody, so we can safely ignore it.
-				// also ignore local.properties so you an override install settings
-				result = explodedPath[explodedPath.length - 1] == ".DS_Store" ||
-				explodedPath[explodedPath.length - 1] == "local.properties";
+				if(ALLOWED_FILE_NAMES.indexOf(file.name) < 0)
+				{
+					return false;
+				}
 			}
-
-			return result;
+			return true;
 		}
 
 		private function browseForInstallDirectory():void
