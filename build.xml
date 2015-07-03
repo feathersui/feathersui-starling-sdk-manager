@@ -134,6 +134,7 @@
 		<echo message="Verifying signature for ${bundle.name}${bundle.extension}"/>
 		<exec executable="${mac.spctl}">
 			<arg value="--assess"/>
+			<arg value="--verbose"/>
 			<arg value="--type"/>
 			<arg value="execute"/>
 			<arg value="${output.path}/${bundle.name}${bundle.extension}"/>
@@ -141,12 +142,24 @@
 	</target>
 
 	<target name="-package-mac" if="is.mac">
-		<exec executable="${mac.productbuild}">
+		<echo message="Creating and signing FeathersSDKManagerInstaller-${version}.pkg"/>
+		<exec executable="${mac.pkgbuild}">
 			<arg value="--component"/>
 			<arg value="${output.path}/${bundle.name}${bundle.extension}"/>
+			<arg value="--version"/>
+			<arg value="${version}"/>
+			<arg value="--install-location"/>
 			<arg value="/Applications"/>
 			<arg value="--sign"/>
 			<arg value="${mac.installer.certificate.name}"/>
+			<arg value="${output.path}/FeathersSDKManagerInstaller-${version}.pkg"/>
+		</exec>
+		<echo message="Verifying signature for FeathersSDKManagerInstaller-${version}.pkg"/>
+		<exec executable="${mac.spctl}">
+			<arg value="--assess"/>
+			<arg value="--verbose"/>
+			<arg value="--type"/>
+			<arg value="install"/>
 			<arg value="${output.path}/FeathersSDKManagerInstaller-${version}.pkg"/>
 		</exec>
 
