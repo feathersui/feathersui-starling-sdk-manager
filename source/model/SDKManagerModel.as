@@ -83,10 +83,18 @@ package model
 			return this._operatingSystem;
 		}
 		
+		private var _latestVersion:String;
+		
+		public function get latestVersion():String
+		{
+			return this._latestVersion;
+		}
+		
 		public function parseConfiguration(data:XML):void
 		{
 			try
 			{
+				this.parseSDKManagerUpdate(data);
 				this.parseProducts(data);
 				this.parseRuntimes(data);
 			} 
@@ -99,12 +107,18 @@ package model
 			}
 		}
 		
+		private function parseSDKManagerUpdate(data:XML):void
+		{
+			var SDKManagerData:XML = data.SDKManager[0];
+			this._latestVersion = SDKManagerData.@latestVersion.toString();
+		}
+		
 		private function parseProducts(data:XML):void
 		{
 			var products:Vector.<ProductConfigurationItem> = new <ProductConfigurationItem>[];
 			
 			var productData:XMLList = data.products;
-			var productsList:XMLList = data.products[0].children();
+			var productsList:XMLList = productData[0].children();
 			var productCount:int = productsList.length();
 			for(var i:int = 0; i < productCount; i++)
 			{

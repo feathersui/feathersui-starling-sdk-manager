@@ -134,7 +134,7 @@ package services
 				{
 					abortError = UNKNOWN_ABORT_ERROR;
 				}
-				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, UNKNOWN_ABORT_ERROR);
+				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, abortError);
 			}
 		}
 		

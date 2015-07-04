@@ -41,6 +41,8 @@
 			</and>
 		</condition>
 	</fail>
+	<fail unless="flox.id" message="Must define flox.id in build.local.properties for Flox analytics"/>
+	<fail unless="flox.key" message="Must define flox.key in build.local.properties for Flox analytics"/>
 
 	<target name="build" depends="-build-win,-build-mac" description="Builds the Feathers SDK Manager for the current platform"/>
 
@@ -68,6 +70,15 @@
 			<arg value="+flexlib"/>
 			<arg value="${frameworks.root}"/>
 			<arg value="+configname=air"/>
+			<arg value="-define"/>
+			<arg value="CONFIG::USE_FLOX"/>
+			<arg value="true"/>
+			<arg value="-define"/>
+			<arg value="CONFIG::FLOX_ID"/>
+			<arg value="&quot;${flox.id}&quot;"/>
+			<arg value="-define"/>
+			<arg value="CONFIG::FLOX_KEY"/>
+			<arg value="&quot;${flox.key}&quot;"/>
 			<arg value="-swf-version=${swf.version}"/>
 			<arg value="-source-path+=${source.root}"/>
 			<arg value="-library-path+=${library.root}"/>

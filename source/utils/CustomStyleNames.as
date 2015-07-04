@@ -18,6 +18,7 @@ package utils
 {
 	public class CustomStyleNames
 	{
+		public static const ALTERNATE_STYLE_NAME_UPDATE_BUTTON:String = "feathers-sdk-manager-update-button";
 		public static const ALTERNATE_STYLE_NAME_FEATHERS_SDK_ICON_IMAGE_LOADER:String = "feathers-sdk-manager-feathers-sdk-icon-image-loader";
 		public static const ALTERNATE_STYLE_NAME_ADOBE_RUNTIMES_ICON_IMAGE_LOADER:String = "feathers-sdk-manager-adobe-runtimes-icon-image-loader";
 		public static const ALTERNATE_STYLE_NAME_DIRECTORY_ICON_IMAGE_LOADER:String = "feathers-sdk-manager-directory-icon-image-loader";

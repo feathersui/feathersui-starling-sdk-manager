@@ -16,6 +16,18 @@ limitations under the License.
 */
 package
 {
+	import com.gamua.flox.Flox;
+
+	import commands.FloxInitCommand;
+	import commands.FloxLogErrorCommand;
+	import commands.FloxLogEventInstallCompleteCommand;
+
+	import events.AcquireProductServiceEventType;
+	import events.RunInstallScriptServiceEventType;
+
+	import flash.desktop.NativeApplication;
+	import flash.events.UncaughtErrorEvent;
+
 	import model.SDKManagerModel;
 
 	import org.robotlegs.starling.base.ContextEventType;
@@ -27,6 +39,8 @@ package
 	import services.IRunInstallerScriptService;
 	import services.LoadConfigurationService;
 	import services.RunInstallerScriptService;
+
+	import starling.core.Starling;
 
 	import view.ChooseInstallDirectoryScreen;
 	import view.ChooseProductScreen;
@@ -60,6 +74,21 @@ package
 			this.injector.mapSingletonOf(IAcquireProductService, AcquireProductService);
 			this.injector.mapSingletonOf(IRunInstallerScriptService, RunInstallerScriptService);
 			
+			var applicationDescriptor:XML = NativeApplication.nativeApplication.applicationDescriptor;
+			var ns:Namespace = applicationDescriptor.namespace();
+			var applicationVersion:String = applicationDescriptor.ns::versionNumber.toString();
+			this.injector.mapValue(String, applicationVersion, "applicationVersion");
+			
+			CONFIG::USE_FLOX
+			{
+				this.commandMap.mapEvent(ContextEventType.STARTUP_COMPLETE, FloxInitCommand);
+				this.commandMap.mapEvent(RunInstallScriptServiceEventType.COMPLETE, FloxLogEventInstallCompleteCommand);
+				this.commandMap.mapEvent(RunInstallScriptServiceEventType.ERROR, FloxLogErrorCommand);
+				this.commandMap.mapEvent(AcquireProductServiceEventType.ERROR, FloxLogErrorCommand);
+				Starling.current.nativeStage.root.loaderInfo.uncaughtErrorEvents.addEventListener(
+					UncaughtErrorEvent.UNCAUGHT_ERROR, uncaughtErrorEvents_uncaughtErrorEventHandler);
+			}
+			
 			this.mediatorMap.mapView(FeathersSDKManager, FeathersSDKManagerMediator);
 			this.mediatorMap.mapView(ChooseProductScreen, ChooseProductScreenMediator);
 			this.mediatorMap.mapView(ChooseRuntimeScreen, ChooseRuntimeScreenMediator);
@@ -71,6 +100,20 @@ package
 			this.mediatorMap.mapView(ConfigureDownloadCacheScreen, ConfigureDownloadCacheScreenMediator);
 			
 			this.dispatchEventWith(ContextEventType.STARTUP_COMPLETE);
+		}
+		
+		private function uncaughtErrorEvents_uncaughtErrorEventHandler(event:UncaughtErrorEvent):void
+		{
+			var error:* = event.error;
+			if(error is Error)
+			{
+				var errorError:Error = Error(error);
+				Flox.logError(error, "Uncaught Error: " + errorError.message);
+			}
+			else
+			{
+				Flox.logError("UncaughtError", error);
+			}
 		}
 	}
 }

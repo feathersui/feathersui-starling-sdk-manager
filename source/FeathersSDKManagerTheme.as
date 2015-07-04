@@ -16,8 +16,10 @@ limitations under the License.
 */
 package
 {
+	import feathers.controls.Button;
 	import feathers.controls.Check;
 	import feathers.controls.ImageLoader;
+	import feathers.layout.AnchorLayoutData;
 	import feathers.themes.MetalWorksDesktopTheme;
 
 	import starling.textures.Texture;
@@ -88,6 +90,9 @@ package
 		{
 			super.initializeStyleProviders();
 			
+			this.getStyleProviderForClass(Button).setFunctionForStyleName(
+				CustomStyleNames.ALTERNATE_STYLE_NAME_UPDATE_BUTTON, setUpdateButtonStyles);
+			
 			this.getStyleProviderForClass(Check).setFunctionForStyleName(
 				CustomStyleNames.ALTERNATE_STYLE_NAME_ITEM_RENDERER_CHECK, setItemRendererCheckStyles);
 			
@@ -99,6 +104,12 @@ package
 				CustomStyleNames.ALTERNATE_STYLE_NAME_DIRECTORY_ICON_IMAGE_LOADER, setDirectoryIconImageLoaderStyles);
 			this.getStyleProviderForClass(ImageLoader).setFunctionForStyleName(
 				CustomStyleNames.ALTERNATE_STYLE_NAME_INSTALL_FAILED_ICON_IMAGE_LOADER, setInstallFailedIconImageLoaderStyles);
+		}
+		
+		protected function setUpdateButtonStyles(button:Button):void
+		{
+			this.setCallToActionButtonStyles(button);
+			button.layoutData = new AnchorLayoutData(this.gutterSize, this.gutterSize);
 		}
 		
 		protected function setItemRendererCheckStyles(check:Check):void

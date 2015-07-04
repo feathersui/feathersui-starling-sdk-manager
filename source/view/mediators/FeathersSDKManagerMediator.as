@@ -20,7 +20,11 @@ package view.mediators
 	import events.LoadConfigurationServiceEventType;
 	import events.RunInstallScriptServiceEventType;
 
+	import feathers.controls.Button;
+	import feathers.controls.LayoutGroup;
 	import feathers.controls.StackScreenNavigatorItem;
+	import feathers.core.PopUpManager;
+	import feathers.layout.AnchorLayout;
 
 	import flash.display.Stage;
 	import flash.events.ContextMenuEvent;
@@ -28,6 +32,8 @@ package view.mediators
 	import flash.events.MouseEvent;
 	import flash.net.NetworkInfo;
 	import flash.net.NetworkInterface;
+	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
 
@@ -38,12 +44,18 @@ package view.mediators
 	import services.ILoadConfigurationService;
 	import services.IRunInstallerScriptService;
 
+	import starling.animation.Transitions;
+	import starling.animation.Tween;
 	import starling.core.Starling;
 	import starling.events.Event;
+
+	import utils.CustomStyleNames;
 
 	public class FeathersSDKManagerMediator extends Mediator
 	{
 		private static const NO_ACTIVE_NETWORK_ERROR:String = "Cannot install the Feathers SDK at this time. Please check your Internet connection.";
+		
+		private static const DEFAULT_UPDATE_URL:String = "http://feathersui.com/sdk/feathers-sdk-manager/";
 		
 		[Inject]
 		public var navigator:FeathersSDKManager;
@@ -56,6 +68,9 @@ package view.mediators
 		
 		[Inject]
 		public var configService:ILoadConfigurationService;
+		
+		[Inject(name="applicationVersion")]
+		public var applicationVersion:String;
 		
 		private var _contextMenu:ContextMenu;
 		
@@ -128,6 +143,58 @@ package view.mediators
 			return hasActiveNetwork;
 		}
 		
+		private function checkForUpdate():void
+		{
+			var latestVersionParts:Array = this.sdkManagerModel.latestVersion.split(".");
+			var currentVersionParts:Array = this.applicationVersion.split(".");
+			var partsCount:int = currentVersionParts.length;
+			if(latestVersionParts.length !== partsCount)
+			{
+				//something went wrong while parsing the version numbers
+				return;
+			}
+			var hasUpdate:Boolean = false;
+			for(var i:int = 0; i < partsCount; i++)
+			{
+				var currentPart:int = parseInt(currentVersionParts[i] as String, 10);
+				var latestPart:int = parseInt(latestVersionParts[i] as String, 10);
+				if(latestPart > currentPart)
+				{
+					hasUpdate = true;
+					break;
+				}
+			}
+			if(hasUpdate)
+			{
+				var container:LayoutGroup = new LayoutGroup();
+				container.autoSizeMode = LayoutGroup.AUTO_SIZE_MODE_STAGE;
+				container.layout = new AnchorLayout();
+				var updateButton:Button = new Button();
+				updateButton.styleNameList.add(CustomStyleNames.ALTERNATE_STYLE_NAME_UPDATE_BUTTON);
+				updateButton.label = "New SDK Manager Update!";
+				this.eventMap.mapListener(updateButton, starling.events.Event.TRIGGERED, updateButton_triggeredHandler);
+				container.addChild(updateButton);
+				PopUpManager.addPopUp(container, false, false);
+				container.validate();
+				updateButton.includeInLayout = false;
+				var y:Number = updateButton.y;
+				updateButton.y = -updateButton.height;
+				var tween:Tween = Tween(Starling.juggler.tween(updateButton, 0.5, {y: y}));
+				tween.delay = 0.5;
+				tween.roundToInt = true;
+				tween.transition = Transitions.EASE_OUT_BACK;
+				tween.onComplete = function():void
+				{
+					updateButton.includeInLayout = true;
+				}
+			}
+		}
+		
+		private function updateButton_triggeredHandler(event:starling.events.Event):void
+		{
+			navigateToURL(new URLRequest(DEFAULT_UPDATE_URL), "_blank");
+		}
+		
 		private function nativeStage_rightMouseDownHandler(event:MouseEvent):void
 		{
 			if(!this._allowContextMenu || this.navigator.activeScreenID === FeathersSDKManager.SCREEN_ID_DOWNLOAD_CACHE)
@@ -155,6 +222,7 @@ package view.mediators
 		
 		private function context_loadConfigurationCompleteHandler(event:starling.events.Event):void
 		{
+			this.checkForUpdate();
 			this._allowContextMenu = true;
 			this.navigator.rootScreenID = FeathersSDKManager.SCREEN_ID_CHOOSE_PRODUCT;
 		}
