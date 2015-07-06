@@ -16,18 +16,26 @@ limitations under the License.
 */
 package commands
 {
-	import com.gamua.flox.Flox;
+	import model.SDKManagerModel;
 
+	import com.bowlerhatsoftware.analytics.GAMeasurementProtocol;
 	import org.robotlegs.starling.mvcs.Command;
 
-	public class FloxInitCommand extends Command
+	import starling.events.Event;
+
+	public class AnalyticsErrorCommand extends Command
 	{
-		[Inject(name="applicationVersion")]
-		public var applicationVersion:String;
+		[Inject]
+		public var event:Event;
+		
+		[Inject]
+		public var sdkManagerModel:SDKManagerModel;
 		
 		override public function execute():void
 		{
-			Flox.init(CONFIG::FLOX_ID, CONFIG::FLOX_KEY, this.applicationVersion);
+			var errorType:String = this.event.type;
+			var message:String = this.event.data as String;
+			GAMeasurementProtocol.trackException(errorType + ": " + message, true);
 		}
 	}
 }

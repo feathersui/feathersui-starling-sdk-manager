@@ -16,11 +16,10 @@ limitations under the License.
 */
 package
 {
-	import com.gamua.flox.Flox;
+	import commands.AnalyticsInitCommand;
 
-	import commands.FloxInitCommand;
-	import commands.FloxLogErrorCommand;
-	import commands.FloxLogEventInstallCompleteCommand;
+	import commands.AnalyticsErrorCommand;
+	import commands.AnalyticsEventInstallCompleteCommand;
 
 	import events.AcquireProductServiceEventType;
 	import events.RunInstallScriptServiceEventType;
@@ -79,12 +78,13 @@ package
 			var applicationVersion:String = applicationDescriptor.ns::versionNumber.toString();
 			this.injector.mapValue(String, applicationVersion, "applicationVersion");
 			
-			CONFIG::USE_FLOX
+			CONFIG::USE_ANALYTICS
 			{
-				this.commandMap.mapEvent(ContextEventType.STARTUP_COMPLETE, FloxInitCommand);
-				this.commandMap.mapEvent(RunInstallScriptServiceEventType.COMPLETE, FloxLogEventInstallCompleteCommand);
-				this.commandMap.mapEvent(RunInstallScriptServiceEventType.ERROR, FloxLogErrorCommand);
-				this.commandMap.mapEvent(AcquireProductServiceEventType.ERROR, FloxLogErrorCommand);
+				this.commandMap.mapEvent(ContextEventType.STARTUP_COMPLETE, AnalyticsInitCommand);
+				this.commandMap.mapEvent(RunInstallScriptServiceEventType.COMPLETE, AnalyticsEventInstallCompleteCommand);
+				this.commandMap.mapEvent(RunInstallScriptServiceEventType.ERROR, AnalyticsErrorCommand);
+				this.commandMap.mapEvent(AcquireProductServiceEventType.ERROR, AnalyticsErrorCommand);
+				this.commandMap.mapEvent(UncaughtErrorEvent.UNCAUGHT_ERROR, AnalyticsErrorCommand);
 				Starling.current.nativeStage.root.loaderInfo.uncaughtErrorEvents.addEventListener(
 					UncaughtErrorEvent.UNCAUGHT_ERROR, uncaughtErrorEvents_uncaughtErrorEventHandler);
 			}
@@ -108,11 +108,11 @@ package
 			if(error is Error)
 			{
 				var errorError:Error = Error(error);
-				Flox.logError(error, "Uncaught Error: " + errorError.message);
+				this.dispatchEventWith(UncaughtErrorEvent.UNCAUGHT_ERROR, false, errorError.message);
 			}
 			else
 			{
-				Flox.logError("UncaughtError", error);
+				this.dispatchEventWith(UncaughtErrorEvent.UNCAUGHT_ERROR, false, error);
 			}
 		}
 	}
