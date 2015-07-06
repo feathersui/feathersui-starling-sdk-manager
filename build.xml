@@ -74,7 +74,7 @@
 			<arg value="true"/>
 			<arg value="-define"/>
 			<arg value="CONFIG::ANALYTICS_TRACKING_ID"/>
-			<arg value="&quot;${analytics.id}&quot;"/>
+			<arg value="'${analytics.id}'"/>
 			<arg value="-swf-version=${swf.version}"/>
 			<arg value="-source-path+=${source.root}"/>
 			<arg value="-library-path+=${library.root}"/>
