@@ -249,14 +249,17 @@ package services
 			{
 				var fzf:ZipFile = e.file;
 				var f:File = this._unzipDirectory.resolvePath(fzf.filename);
-				var fs:FileStream = new FileStream();
 				
 				if (isZipFileADirectory(fzf))
 				{
-					// Is a directory, not a file. Dont try to write anything into it.
+					//the directory may be empty, but we still want to keep it
+					//because certain IDEs expect specific directories to exist
+					//no matter what
+					f.createDirectory();
 					return;
 				}
-				
+
+				var fs:FileStream = new FileStream();
 				fs.open(f, FileMode.WRITE);
 				fs.writeBytes(fzf.content);
 				fs.close();
