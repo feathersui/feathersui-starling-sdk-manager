@@ -357,7 +357,7 @@ package services
 			catch(error:Error)
 			{
 				this.cleanup();
-				this.sdkManagerModel.log(COPY_ERROR);
+				this.sdkManagerModel.log(COPY_ERROR + " " + error);
 				this.dispatchWith(AcquireProductServiceEventType.ERROR, false, COPY_ERROR);
 				return;
 			}
@@ -389,14 +389,14 @@ package services
 		private function loader_ioErrorHandler(event:IOErrorEvent):void
 		{
 			this.cleanup();
-			this.sdkManagerModel.log(NOT_FOUND_ON_SERVER_ERROR);
+			this.sdkManagerModel.log(NOT_FOUND_ON_SERVER_ERROR + " " + event);
 			this.dispatchWith(AcquireProductServiceEventType.ERROR, false, NOT_FOUND_ON_SERVER_ERROR);
 		}
 		
 		private function loader_securityErrorHandler(event:SecurityErrorEvent):void
 		{
 			this.cleanup();
-			this.sdkManagerModel.log(SECURITY_ERROR);
+			this.sdkManagerModel.log(SECURITY_ERROR + " " + event);
 			this.dispatchWith(AcquireProductServiceEventType.ERROR, false, SECURITY_ERROR);
 		}
 		

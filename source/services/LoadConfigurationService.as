@@ -34,6 +34,8 @@ package services
 	public class LoadConfigurationService extends Actor implements ILoadConfigurationService
 	{
 		private static const LOAD_IN_PROGRESS_ERROR:String = "Loading the Feathers SDK configuration data failed. Loading is already in progress.";
+		private static const FILE_NOT_FOUND_ERROR:String = "Loading the Feathers SDK configuration data failed. The file was not found on the server.";
+		private static const SECURITY_ERROR:String = "Loading the Feathers SDK configuration data failed. Security sandbox error.";
 		private static const PARSE_CONFIGURATION_ERROR:String = "Loading the Feathers SDK configuration data failed. Cannot parse configuration file.";
 		
 		private static const LOAD_PROGRESS_LABEL:String = "Loading configuration data...";
@@ -89,7 +91,7 @@ package services
 			} 
 			catch(error:Error) 
 			{
-				this.sdkManagerModel.log("Error while parsing configuration file. " + error);
+				this.sdkManagerModel.log(PARSE_CONFIGURATION_ERROR + " " + error);
 				this.cleanup();
 				this.dispatchWith(LoadConfigurationServiceEventType.ERROR, false, PARSE_CONFIGURATION_ERROR);
 				return;
@@ -107,16 +109,16 @@ package services
 		
 		private function loader_ioErrorHandler(event:IOErrorEvent):void
 		{
-			this.sdkManagerModel.log("Error while loading configuration file. " + event);
+			this.sdkManagerModel.log(FILE_NOT_FOUND_ERROR + " " + event);
 			this.cleanup();
-			this.dispatchWith(LoadConfigurationServiceEventType.ERROR, false);
+			this.dispatchWith(LoadConfigurationServiceEventType.ERROR, false, FILE_NOT_FOUND_ERROR);
 		}
 		
 		private function loader_securityErrorHandler(event:SecurityErrorEvent):void
 		{
-			this.sdkManagerModel.log("Error while loading configuration file. " + event);
+			this.sdkManagerModel.log(SECURITY_ERROR + " " + event);
 			this.cleanup();
-			this.dispatchWith(LoadConfigurationServiceEventType.ERROR, false);
+			this.dispatchWith(LoadConfigurationServiceEventType.ERROR, false, SECURITY_ERROR);
 		}
 	}
 }
