@@ -171,7 +171,14 @@ package view.mediators
 			{
 				var currentPart:int = parseInt(currentVersionParts[i] as String, 10);
 				var latestPart:int = parseInt(latestVersionParts[i] as String, 10);
-				if(latestPart > currentPart)
+				if(currentPart > latestPart)
+				{
+					//this version is newer than the latest in the configuration
+					//file. either it's a prerelease version or auto-updates
+					//haven't been enabled for the latest version yet.
+					break;
+				}
+				else if(currentPart < latestPart)
 				{
 					hasUpdate = true;
 					break;
