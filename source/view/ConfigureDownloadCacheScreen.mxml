@@ -42,7 +42,7 @@ limitations under the License.
 			</f:layoutData>
 		</f:Label>
 		<f:Check id="enabledCheck"
-			isSelected="@{downloadCacheEnabled}" label="Use download cache"/>
+			isSelected="@{downloadCacheEnabled}" label="Use download cache for this session"/>
 		<f:TextInput id="downloadCacheInput"
 			isEnabled="{downloadCacheEnabled}" isEditable="false"
 			text="{downloadCacheDirectory.nativePath}"
@@ -132,13 +132,20 @@ limitations under the License.
 
 		private function saveButton_triggeredHandler(event:starling.events.Event):void
 		{
-			if(this.downloadCacheEnabled && (!this._downloadCacheDirectory || !this._downloadCacheDirectory.exists))
+			if(this.downloadCacheEnabled)
 			{
-				Alert.show("Please select a download cache directory or disable this setting.", "Error", new ListCollection(
-						[
-							{label: "OK"}
-						]));
-				return;
+				if(!this._downloadCacheDirectory)
+				{
+					Alert.show("Please select a download cache directory, or disable this setting.", "Error", new ListCollection(
+					[
+						{ label: "OK" }
+					]));
+					return;
+				}
+				else if(!this._downloadCacheDirectory.exists)
+				{
+					this._downloadCacheDirectory.createDirectory();
+				}
 			}
 			this.dispatchEventWith(starling.events.Event.COMPLETE);
 		}
