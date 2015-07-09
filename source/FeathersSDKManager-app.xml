@@ -3,7 +3,7 @@
 	<id>com.feathersui.FeathersSDKManager</id>
 	<filename>Feathers SDK Manager</filename>
 	<name>Feathers SDK Manager</name>
-	<versionNumber>1.0.2</versionNumber>
+	<versionNumber>1.1.0</versionNumber>
 	<description>Downloads and manages the Feathers SDK and its dependencies.</description>
 	<copyright>2015 Bowler Hat LLC</copyright>
 
