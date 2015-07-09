@@ -63,12 +63,14 @@ package services
 			
 			if(this.isActive)
 			{
+				this.sdkManagerModel.log(INSTALLATION_IN_PROGRESS_ERROR);
 				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, INSTALLATION_IN_PROGRESS_ERROR);
 				return;
 			}
 			
 			if(this.sdkManagerModel.selectedRuntime === null)
 			{
+				this.sdkManagerModel.log(NO_RUNTIME_SELECTED_ERROR);
 				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, NO_RUNTIME_SELECTED_ERROR);
 				return;
 			}
@@ -76,6 +78,7 @@ package services
 			this.eventDispatcher.addEventListener(RunInstallScriptServiceEventType.CANCEL, context_runInstallerScriptCancelHandler);
 			
 			this._ant = new Ant();
+			this._ant.output = this.sdkManagerModel.log;
 			var installDirectory:File = this.sdkManagerModel.installDirectory;
 			var installerScriptFile:File = installDirectory.resolvePath("installer.xml");
 			Starling.current.stage.addEventListener(starling.events.Event.ENTER_FRAME, enterFrameHandler);
@@ -98,6 +101,10 @@ package services
 			context["air.sdk.version"] = selectedRuntime.airVersionNumber;
 			context["flash.sdk.version"] = selectedRuntime.playerGlobalVersionNumber;
 			
+			this.sdkManagerModel.log("Installing with script: " + installerScriptFile.nativePath);
+			this.sdkManagerModel.log("AIR SDK version: " + selectedRuntime.airVersionNumber);
+			this.sdkManagerModel.log("playerglobal.swc version: " + selectedRuntime.playerGlobalVersionNumber);
+			this.sdkManagerModel.log("Download cache: " + (downloadCacheEnabled ? this.sdkManagerModel.downloadCacheDirectory.nativePath : "Disabled"));
 			if(installerScriptFile.exists && !this._ant.processXMLFile(installerScriptFile, context, true))
 			{
 				this._ant.addEventListener(flash.events.Event.COMPLETE, ant_completeHandler);
@@ -105,6 +112,7 @@ package services
 			}
 			else
 			{
+				this.sdkManagerModel.log(MISSING_SCRIPT_ERROR);
 				this.cleanupInstallation(false, true, MISSING_SCRIPT_ERROR);
 			}
 		}
@@ -147,6 +155,7 @@ package services
 				{
 					errorMessage = UNKNOWN_ERROR;
 				}
+				this.sdkManagerModel.log(errorMessage);
 				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, errorMessage);
 			}
 		}
@@ -164,6 +173,7 @@ package services
 				{
 					//success!
 					this.cleanupInstallation(false, false);
+					this.sdkManagerModel.log("Installation completed successfully.");
 					this.dispatchWith(RunInstallScriptServiceEventType.COMPLETE);
 					return;
 				}

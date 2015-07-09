@@ -53,8 +53,10 @@ package services
 		private static const ACQUISITION_IN_PROGRESS_ERROR:String = "Downloading the Feathers SDK failed. A download is already in progress.";
 		private static const NO_PRODUCT_SELECTED_ERROR:String = "Downloading the Feathers SDK failed. No version of the Feathers SDK is selected.";
 		private static const NOT_FOUND_ON_SERVER_ERROR:String = "Downloading the Feathers SDK failed. The binary distribution was not found on the server.";
+		private static const SECURITY_ERROR:String = "Downloading the Feathers SDK failed. Security sandbox error.";
 		private static const BINARY_DISTRIBUTION_NOT_FOUND_ERROR:String = "Downloading the Feathers SDK failed. Downloaded file not found.";
 		private static const DECOMPRESS_ERROR:String = "Decompressing the Feathers SDK failed.";
+		private static const COPY_ERROR:String = "Copying the Feathers SDK to destination directory failed.";
 		
 		private static const LOAD_PROGRESS_LABEL:String = "Downloading Feathers SDK...";
 		private static const DECOMPRESS_PROGRESS_LABEL:String = "Decompressing Feathers SDK...";
@@ -79,12 +81,14 @@ package services
 			
 			if(this.isActive)
 			{
+				this.sdkManagerModel.log(ACQUISITION_IN_PROGRESS_ERROR);
 				this.dispatchWith(AcquireProductServiceEventType.ERROR, false, ACQUISITION_IN_PROGRESS_ERROR);
 				return;
 			}
 			
 			if(this.sdkManagerModel.selectedProduct === null)
 			{
+				this.sdkManagerModel.log(NO_PRODUCT_SELECTED_ERROR);
 				this.dispatchWith(AcquireProductServiceEventType.ERROR, false, NO_PRODUCT_SELECTED_ERROR);
 				return;
 			}
@@ -100,6 +104,7 @@ package services
 				//in the cache.
 				if(cacheFile.exists)
 				{
+					this.sdkManagerModel.log("Loading product from download cache: " + this.getProductFileName());
 					var bytes:ByteArray = new ByteArray();
 					var stream:FileStream = new FileStream();
 					stream.open(cacheFile, FileMode.READ);
@@ -111,6 +116,7 @@ package services
 				}
 			}
 			var url:String = this.getProductURL();
+			this.sdkManagerModel.log("Loading product from URL: " + url);
 			this._loader = new URLLoader();
 			this._loader.dataFormat = URLLoaderDataFormat.BINARY;
 			this._loader.addEventListener(flash.events.Event.COMPLETE, loader_completeHandler);
@@ -150,7 +156,6 @@ package services
 		
 		private function saveProductFile(bytes:ByteArray):void
 		{	
-			var selectedProduct:ProductConfigurationItem = this.sdkManagerModel.selectedProduct;
 			var binaryDistribution:File = this._tempDirectory.resolvePath(this.getProductFileName());
 			if(binaryDistribution.exists)
 			{
@@ -182,10 +187,12 @@ package services
 			var binaryDistribution:File = this._tempDirectory.resolvePath(this.getProductFileName());
 			if(!binaryDistribution.exists)
 			{
+				this.sdkManagerModel.log(BINARY_DISTRIBUTION_NOT_FOUND_ERROR);
 				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, BINARY_DISTRIBUTION_NOT_FOUND_ERROR);
 				this.cleanup();
 				return;
 			}
+			this.sdkManagerModel.log("Decompressing product.");
 			if(this.sdkManagerModel.operatingSystem == SDKManagerModel.OPERATING_SYSTEM_WINDOWS) //zip
 			{
 				this._destinationDirectory = this._tempDirectory.resolvePath(selectedProduct.file);
@@ -235,7 +242,8 @@ package services
 					} 
 					catch(error:Error) 
 					{
-						trace("SDK Manager error: cannot delete temporary directory.");
+						//this is a non-fatal error, so we'll just log it.
+						this.sdkManagerModel.log("Error while deleting temporary directory.");
 					}
 				}
 				this._tempDirectory = null;
@@ -282,6 +290,7 @@ package services
 			catch (error:Error)
 			{
 				this.cleanup();
+				this.sdkManagerModel.log(DECOMPRESS_ERROR);
 				this.dispatchWith(AcquireProductServiceEventType.ERROR, false, DECOMPRESS_ERROR);
 			}
 		}
@@ -330,15 +339,29 @@ package services
 			if(!this._destinationDirectory.exists || !this._destinationDirectory.isDirectory)
 			{
 				this.cleanup();
+				this.sdkManagerModel.log(BINARY_DISTRIBUTION_NOT_FOUND_ERROR);
 				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, BINARY_DISTRIBUTION_NOT_FOUND_ERROR);
 				return;
 			}
+			this.sdkManagerModel.log("Product decompressed successfully.");
 			var installDirectory:File = this.sdkManagerModel.installDirectory;
-			var files:Array = this._destinationDirectory.getDirectoryListing();
-			for each(var file:File in files)
+			this.sdkManagerModel.log("Copying files to destination: " + installDirectory.nativePath);
+			try
 			{
-				file.copyTo(installDirectory.resolvePath(file.name));
+				var files:Array = this._destinationDirectory.getDirectoryListing();
+				for each(var file:File in files)
+				{
+					file.copyTo(installDirectory.resolvePath(file.name));
+				}
 			}
+			catch(error:Error)
+			{
+				this.cleanup();
+				this.sdkManagerModel.log(COPY_ERROR);
+				this.dispatchWith(AcquireProductServiceEventType.ERROR, false, COPY_ERROR);
+				return;
+			}
+			this.sdkManagerModel.log("Files copied successfully.");
 			this.cleanup();
 			this.dispatchWith(AcquireProductServiceEventType.COMPLETE);
 		}
@@ -346,11 +369,13 @@ package services
 		private function decompress_errorHandler(event:flash.events.Event):void
 		{
 			this.cleanup();
+			this.sdkManagerModel.log(DECOMPRESS_ERROR);
 			this.dispatchWith(AcquireProductServiceEventType.ERROR, false, DECOMPRESS_ERROR);
 		}
 		
 		private function loader_completeHandler(event:flash.events.Event):void
 		{
+			this.sdkManagerModel.log("Product loaded successfully.");
 			this.saveProductFile(this._loader.data as ByteArray);
 			this.decompress();
 		}
@@ -364,13 +389,15 @@ package services
 		private function loader_ioErrorHandler(event:IOErrorEvent):void
 		{
 			this.cleanup();
+			this.sdkManagerModel.log(NOT_FOUND_ON_SERVER_ERROR);
 			this.dispatchWith(AcquireProductServiceEventType.ERROR, false, NOT_FOUND_ON_SERVER_ERROR);
 		}
 		
 		private function loader_securityErrorHandler(event:SecurityErrorEvent):void
 		{
 			this.cleanup();
-			this.dispatchWith(AcquireProductServiceEventType.ERROR, false, NOT_FOUND_ON_SERVER_ERROR);
+			this.sdkManagerModel.log(SECURITY_ERROR);
+			this.dispatchWith(AcquireProductServiceEventType.ERROR, false, SECURITY_ERROR);
 		}
 		
 		private function context_aquireProductCancelHandler(event:starling.events.Event):void

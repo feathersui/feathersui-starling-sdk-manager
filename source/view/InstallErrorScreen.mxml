@@ -20,6 +20,7 @@ limitations under the License.
 	
 	<fx:Metadata>
 		[Event(name="complete", type="starling.events.Event")]
+		[Event(name="open", type="starling.events.Event")]
 	</fx:Metadata>
 	
 	<f:layout>
@@ -46,6 +47,12 @@ limitations under the License.
 		<f:layoutData>
 			<f:AnchorLayoutData right="0" bottom="0" left="0"/>
 		</f:layoutData>
+		<f:leftItems>
+			<fx:Vector type="starling.display.DisplayObject">
+				<f:Button label="Show Logs" styleName="{Button.ALTERNATE_STYLE_NAME_QUIET_BUTTON}"
+					triggered="showLogsButton_triggeredHandler(event)"/>
+			</fx:Vector>
+		</f:leftItems>
 		<f:rightItems>
 			<fx:Vector type="starling.display.DisplayObject">
 				<f:Button label="Exit" triggered="exitButton_triggeredHandler(event)"/>
@@ -59,9 +66,15 @@ limitations under the License.
 		[Bindable]
 		public var errorMessage:String;
 
-		protected function exitButton_triggeredHandler(event:Event):void
+		private function exitButton_triggeredHandler(event:Event):void
 		{
 			this.dispatchEventWith(Event.COMPLETE);
 		}
+
+		private function showLogsButton_triggeredHandler(event:Event):void
+		{
+			this.dispatchEventWith(Event.OPEN);
+		}
+		
 		]]></fx:Script>
 </f:Screen>

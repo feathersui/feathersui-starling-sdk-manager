@@ -52,6 +52,7 @@ package services
 		
 		public function loadConfiguration():void
 		{
+			this.sdkManagerModel.log("Loading configuration file: " + CONFIGURATION_URL);
 			this.dispatchWith(LoadConfigurationServiceEventType.START);
 			
 			if(this.isActive)
@@ -80,6 +81,7 @@ package services
 		
 		private function loader_completeHandler(event:Event):void
 		{
+			this.sdkManagerModel.log("Configuration file loaded successfully.");
 			try
 			{
 				var xml:XML = new XML(this._loader.data);
@@ -87,11 +89,13 @@ package services
 			} 
 			catch(error:Error) 
 			{
+				this.sdkManagerModel.log("Error while parsing configuration file. " + error);
 				this.cleanup();
 				this.dispatchWith(LoadConfigurationServiceEventType.ERROR, false, PARSE_CONFIGURATION_ERROR);
 				return;
 			}
 			this.cleanup();
+			this.sdkManagerModel.log("Configuration file parsed successfully.");
 			this.dispatchWith(LoadConfigurationServiceEventType.COMPLETE);
 		}
 		
@@ -103,12 +107,14 @@ package services
 		
 		private function loader_ioErrorHandler(event:IOErrorEvent):void
 		{
+			this.sdkManagerModel.log("Error while loading configuration file. " + event);
 			this.cleanup();
 			this.dispatchWith(LoadConfigurationServiceEventType.ERROR, false);
 		}
 		
 		private function loader_securityErrorHandler(event:SecurityErrorEvent):void
 		{
+			this.sdkManagerModel.log("Error while loading configuration file. " + event);
 			this.cleanup();
 			this.dispatchWith(LoadConfigurationServiceEventType.ERROR, false);
 		}

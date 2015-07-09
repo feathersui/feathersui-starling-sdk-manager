@@ -90,6 +90,23 @@ package model
 			return this._latestVersion;
 		}
 		
+		private var _logs:Vector.<String> = new <String>[];
+		
+		public function get logs():Vector.<String>
+		{
+			return this._logs;
+		}
+		
+		public function log(message:String):void
+		{
+			if(!message)
+			{
+				return;
+			}
+			this._logs[this._logs.length] = message;
+			trace(message);
+		}
+		
 		public function parseConfiguration(data:XML):void
 		{
 			try

@@ -104,6 +104,8 @@ package view.mediators
 			
 			this.createContextMenu();
 			
+			this.sdkManagerModel.log("Feathers SDK Manager " + this.applicationVersion + " " + this.sdkManagerModel.operatingSystem);
+			
 			if(this.checkNetwork())
 			{
 				this.configService.loadConfiguration();
@@ -245,6 +247,7 @@ package view.mediators
 		
 		private function confirmCancelAlert_abortButton_triggeredHandler(event:starling.events.Event):void
 		{
+			this.sdkManagerModel.log("Installation of Feathers SDK aborted.")
 			this.cleanUpConfirmCancelAlert();
 			if(this.productService.isActive)
 			{

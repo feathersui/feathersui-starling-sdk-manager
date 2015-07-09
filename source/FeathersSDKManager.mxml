@@ -77,16 +77,33 @@ limitations under the License.
 	
 	<f:StackScreenNavigatorItem id="installError">
 		<fx:Class>view.InstallErrorScreen</fx:Class>
+		<f:pushEvents>
+			<fx:Object open="{SCREEN_ID_LOGS}"/>
+		</f:pushEvents>
 	</f:StackScreenNavigatorItem>
 	
 	<f:StackScreenNavigatorItem id="installComplete">
 		<fx:Class>view.InstallCompleteScreen</fx:Class>
+		<f:pushEvents>
+			<fx:Object open="{SCREEN_ID_LOGS}"/>
+		</f:pushEvents>
 	</f:StackScreenNavigatorItem>
 	
 	<f:StackScreenNavigatorItem id="downloadCache"
 		pushTransition="{Cover.createCoverDownTransition()}"
 		popTransition="{Reveal.createRevealUpTransition()}">
 		<fx:Class>view.ConfigureDownloadCacheScreen</fx:Class>
+		<f:popEvents>
+			<fx:Vector type="String">
+				<fx:String>{Event.COMPLETE}</fx:String>
+			</fx:Vector>
+		</f:popEvents>
+	</f:StackScreenNavigatorItem>
+
+	<f:StackScreenNavigatorItem id="logs"
+		pushTransition="{Cover.createCoverDownTransition()}"
+		popTransition="{Reveal.createRevealUpTransition()}">
+		<fx:Class>view.LogsScreen</fx:Class>
 		<f:popEvents>
 			<fx:Vector type="String">
 				<fx:String>{Event.COMPLETE}</fx:String>
@@ -107,5 +124,6 @@ limitations under the License.
 		public static const SCREEN_ID_INSTALL_COMPLETE:String = "installComplete";
 		public static const SCREEN_ID_INSTALL_ERROR:String = "installError";
 		public static const SCREEN_ID_DOWNLOAD_CACHE:String = "downloadCache";
+		public static const SCREEN_ID_LOGS:String = "logs";
 		]]></fx:Script>
 </f:StackScreenNavigatorApplication>

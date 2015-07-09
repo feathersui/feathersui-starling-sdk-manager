@@ -49,6 +49,7 @@ package
 	import view.InstallErrorScreen;
 	import view.InstallProgressScreen;
 	import view.LicenseScreen;
+	import view.LogsScreen;
 	import view.mediators.ChooseInstallDirectoryScreenMediator;
 	import view.mediators.ChooseProductScreenMediator;
 	import view.mediators.ChooseRuntimeScreenMediator;
@@ -58,6 +59,7 @@ package
 	import view.mediators.InstallErrorScreenMediator;
 	import view.mediators.InstallProgressScreenMediator;
 	import view.mediators.LicenseScreenMediator;
+	import view.mediators.LogsScreenMediator;
 
 	public class FeathersSDKManagerContext extends Context
 	{
@@ -98,6 +100,7 @@ package
 			this.mediatorMap.mapView(InstallErrorScreen, InstallErrorScreenMediator);
 			this.mediatorMap.mapView(InstallCompleteScreen, InstallCompleteScreenMediator);
 			this.mediatorMap.mapView(ConfigureDownloadCacheScreen, ConfigureDownloadCacheScreenMediator);
+			this.mediatorMap.mapView(LogsScreen, LogsScreenMediator);
 			
 			this.dispatchEventWith(ContextEventType.STARTUP_COMPLETE);
 		}
