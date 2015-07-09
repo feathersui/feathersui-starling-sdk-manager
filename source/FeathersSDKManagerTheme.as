@@ -20,8 +20,13 @@ package
 	import feathers.controls.ButtonGroup;
 	import feathers.controls.Check;
 	import feathers.controls.ImageLoader;
+	import feathers.controls.Label;
 	import feathers.layout.AnchorLayoutData;
 	import feathers.themes.MetalWorksDesktopTheme;
+
+	import flash.text.TextFormatAlign;
+
+	import flash.text.engine.ElementFormat;
 
 	import starling.textures.Texture;
 
@@ -105,6 +110,9 @@ package
 				CustomStyleNames.ALTERNATE_STYLE_NAME_DIRECTORY_ICON_IMAGE_LOADER, setDirectoryIconImageLoaderStyles);
 			this.getStyleProviderForClass(ImageLoader).setFunctionForStyleName(
 				CustomStyleNames.ALTERNATE_STYLE_NAME_INSTALL_FAILED_ICON_IMAGE_LOADER, setInstallFailedIconImageLoaderStyles);
+			
+			this.getStyleProviderForClass(Label).setFunctionForStyleName(
+				CustomStyleNames.ALTERNATE_STYLE_NAME_MESSAGE_LABEL, setMessageLabelStyles);
 		}
 		
 		override protected function setAlertButtonGroupStyles(group:ButtonGroup):void
@@ -154,6 +162,12 @@ package
 		{
 			loader.source = this.installFailedIconTexture;
 			loader.setSize(ICON_SIZE, ICON_SIZE);
+		}
+		
+		protected function setMessageLabelStyles(label:Label):void
+		{
+			this.setLabelStyles(label);
+			label.textRendererProperties.textAlign = TextFormatAlign.CENTER;
 		}
 	}
 }

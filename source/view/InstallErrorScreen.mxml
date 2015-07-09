@@ -27,7 +27,7 @@ limitations under the License.
 		<f:AnchorLayout/>
 	</f:layout>
 	
-	<f:LayoutGroup>
+	<f:ScrollContainer>
 		<f:layoutData>
 			<f:AnchorLayoutData top="0" right="0" bottom="0" left="0"
 				bottomAnchorDisplayObject="{footer}"/>
@@ -40,8 +40,13 @@ limitations under the License.
 		<f:Label styleName="{Label.ALTERNATE_STYLE_NAME_HEADING}"
 			text="Installation Failed"/>
 		<f:ImageLoader styleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_INSTALL_FAILED_ICON_IMAGE_LOADER}"/>
-		<f:Label text="{errorMessage}"/>
-	</f:LayoutGroup>
+		<f:Label styleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_MESSAGE_LABEL}"
+			text="{errorMessage}" wordWrap="true">
+			<f:layoutData>
+				<f:VerticalLayoutData percentWidth="100"/>
+			</f:layoutData>
+		</f:Label>
+	</f:ScrollContainer>
 	
 	<f:Header id="footer">
 		<f:layoutData>

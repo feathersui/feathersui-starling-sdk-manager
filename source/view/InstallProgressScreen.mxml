@@ -25,9 +25,16 @@ limitations under the License.
 	
 	<f:Label id="progressTitleLabel" styleName="{Label.ALTERNATE_STYLE_NAME_HEADING}" text="{progressTitle}"/>
 	<f:ProgressBar minimum="0" maximum="1" value="{progressValue}"/>
-	<f:Label id="progressLabel" text="{progressText}"/>
+	<f:Label id="progressLabel" styleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_MESSAGE_LABEL}"
+		text="{progressText}" wordWrap="true">
+		<f:layoutData>
+			<f:VerticalLayoutData percentWidth="100"/>
+		</f:layoutData>
+	</f:Label>
 	
 	<fx:Script><![CDATA[
+		import utils.CustomStyleNames;
+
 		[Bindable]
 		public var progressValue:Number = 0;
 		
