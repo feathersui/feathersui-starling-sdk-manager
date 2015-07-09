@@ -41,7 +41,7 @@ package services
 		private static const INSTALLATION_IN_PROGRESS_ERROR:String = "Installation of the Feathers SDK failed. An installation is already in progress.";
 		private static const NO_RUNTIME_SELECTED_ERROR:String = "Downloading the Feathers SDK failed. No runtime is selected.";
 		private static const MISSING_SCRIPT_ERROR:String = "Installation of the Feathers SDK failed. Cannot find SDK installer script.";
-		private static const UNKNOWN_ABORT_ERROR:String = "Installation of the Feathers SDK failed due to an unexpected error.";
+		private static const UNKNOWN_ERROR:String = "Installation of the Feathers SDK failed due to an unexpected error.";
 		
 		private static const COPY_TASK_PROGRESS_LABEL:String = "Copying files...";
 		private static const GET_TASK_PROGRESS_LABEL:String = "Downloading file...";
@@ -72,6 +72,8 @@ package services
 				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, NO_RUNTIME_SELECTED_ERROR);
 				return;
 			}
+
+			this.eventDispatcher.addEventListener(RunInstallScriptServiceEventType.CANCEL, context_runInstallerScriptCancelHandler);
 			
 			this._ant = new Ant();
 			var installDirectory:File = this.sdkManagerModel.installDirectory;
@@ -103,14 +105,22 @@ package services
 			}
 			else
 			{
-				this.cleanupInstallation(true, MISSING_SCRIPT_ERROR);
+				this.cleanupInstallation(false, true, MISSING_SCRIPT_ERROR);
 			}
 		}
 		
-		protected function cleanupInstallation(isAbort:Boolean = false, abortError:String = null):void
+		protected function cleanupInstallation(userCancel:Boolean, isError:Boolean, errorMessage:String = null):void
 		{
+			this.eventDispatcher.removeEventListener(RunInstallScriptServiceEventType.CANCEL, context_runInstallerScriptCancelHandler);
 			Starling.current.stage.removeEventListener(starling.events.Event.ENTER_FRAME, enterFrameHandler);
-			if(isAbort)
+
+			if(this._ant)
+			{
+				this._ant.removeEventListener(flash.events.Event.COMPLETE, ant_completeHandler);
+				this._ant.removeEventListener(ProgressEvent.PROGRESS, ant_progressHandler);
+			}
+
+			if(userCancel || isError)
 			{
 				//delete the files that we put in the installation directory
 				//because the SDK will be in a bad state.
@@ -130,11 +140,14 @@ package services
 						}
 					}
 				}
-				if(abortError === null)
+			}
+			if(isError)
+			{
+				if(errorMessage === null)
 				{
-					abortError = UNKNOWN_ABORT_ERROR;
+					errorMessage = UNKNOWN_ERROR;
 				}
-				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, abortError);
+				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, errorMessage);
 			}
 		}
 		
@@ -145,27 +158,28 @@ package services
 		
 		private function ant_completeHandler(event:flash.events.Event):void
 		{
-			if(Ant.currentAnt)
+			if(this._ant)
 			{
-				if(Ant.currentAnt.project.status)
+				if(this._ant.project.status)
 				{
-					this.cleanupInstallation(!Ant.currentAnt.project.status);
-					this.dispatchWith(RunInstallScriptServiceEventType.COMPLETE);
 					//success!
+					this.cleanupInstallation(false, false);
+					this.dispatchWith(RunInstallScriptServiceEventType.COMPLETE);
+					return;
 				}
-				var failureMessage:String = Ant.currentAnt.project.failureMessage;
+				var failureMessage:String = this._ant.project.failureMessage;
 				if(failureMessage)
 				{
-					this.cleanupInstallation(!Ant.currentAnt.project.status, failureMessage);
+					this.cleanupInstallation(false, true, failureMessage);
 				}
 				else
 				{
-					this.cleanupInstallation(!Ant.currentAnt.project.status);
+					this.cleanupInstallation(false, true);
 				}
 			}
-			else //something went terribly wrong
+			else //something went terribly wrong and we lost ant
 			{
-				this.cleanupInstallation(false);
+				this.cleanupInstallation(false, true);
 			}
 		}
 		
@@ -205,6 +219,11 @@ package services
 			}
 			this.dispatchWith(RunInstallScriptServiceEventType.PROGRESS, false,
 				new ProgressEventData(progressValue, progressLabel));
+		}
+		
+		private function context_runInstallerScriptCancelHandler(event:starling.events.Event):void
+		{
+			this.cleanupInstallation(true, false);
 		}
 	}
 }

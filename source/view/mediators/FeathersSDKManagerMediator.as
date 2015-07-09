@@ -20,10 +20,13 @@ package view.mediators
 	import events.LoadConfigurationServiceEventType;
 	import events.RunInstallScriptServiceEventType;
 
+	import feathers.controls.Alert;
+
 	import feathers.controls.Button;
 	import feathers.controls.LayoutGroup;
 	import feathers.controls.StackScreenNavigatorItem;
 	import feathers.core.PopUpManager;
+	import feathers.data.ListCollection;
 	import feathers.layout.AnchorLayout;
 
 	import flash.display.Stage;
@@ -41,6 +44,8 @@ package view.mediators
 
 	import org.robotlegs.starling.mvcs.Mediator;
 
+	import services.IAcquireProductService;
+
 	import services.ILoadConfigurationService;
 	import services.IRunInstallerScriptService;
 
@@ -54,6 +59,7 @@ package view.mediators
 	public class FeathersSDKManagerMediator extends Mediator
 	{
 		private static const NO_ACTIVE_NETWORK_ERROR:String = "Cannot install the Feathers SDK at this time. Please check your Internet connection.";
+		private static const ABORT_MESSAGE:String = "You have cancelled the installation of the Feathers SDK.";
 		
 		private static const DEFAULT_UPDATE_URL:String = "http://feathersui.com/sdk/feathers-sdk-manager/";
 		
@@ -62,6 +68,9 @@ package view.mediators
 		
 		[Inject]
 		public var sdkManagerModel:SDKManagerModel;
+		
+		[Inject]
+		public var productService:IAcquireProductService;
 		
 		[Inject]
 		public var installerService:IRunInstallerScriptService;
@@ -75,6 +84,8 @@ package view.mediators
 		private var _contextMenu:ContextMenu;
 		
 		private var _allowContextMenu:Boolean = false;
+
+		private var _confirmCancelAlert:Alert;
 		
 		override public function onRegister():void
 		{
@@ -190,6 +201,12 @@ package view.mediators
 			}
 		}
 		
+		private function cleanUpConfirmCancelAlert():void
+		{
+			this.removeViewListener(starling.events.Event.CHANGE, navigator_changeHandler);
+			this._confirmCancelAlert = null;
+		}
+		
 		private function updateButton_triggeredHandler(event:starling.events.Event):void
 		{
 			navigateToURL(new URLRequest(DEFAULT_UPDATE_URL), "_blank");
@@ -210,7 +227,44 @@ package view.mediators
 			{
 				//we don't want to interrupt the installation
 				event.preventDefault();
+				
+				this.addViewListener(starling.events.Event.CHANGE, navigator_changeHandler);
+				this._confirmCancelAlert = Alert.show("Closing this window will abort the installation of the Feathers SDK.",
+					"Confirm Abort Installation", new ListCollection(
+					[
+						{ label: "Continue", triggered: confirmCancelAlert_continueButton_triggeredHandler },
+						{ label: "Abort", triggered: confirmCancelAlert_abortButton_triggeredHandler },
+					]))
 			}
+		}
+		
+		private function confirmCancelAlert_continueButton_triggeredHandler(event:starling.events.Event):void
+		{
+			this.cleanUpConfirmCancelAlert();
+		}
+		
+		private function confirmCancelAlert_abortButton_triggeredHandler(event:starling.events.Event):void
+		{
+			this.cleanUpConfirmCancelAlert();
+			if(this.productService.isActive)
+			{
+				//stop downloading or decompressing the binary distribution
+				this.dispatchWith(AcquireProductServiceEventType.CANCEL);
+			}
+			if(this.installerService.isActive)
+			{
+				//stop running the Ant installer script
+				this.dispatchWith(RunInstallScriptServiceEventType.CANCEL);
+			}
+			var item:StackScreenNavigatorItem = this.navigator.installError;
+			item.properties.errorMessage = ABORT_MESSAGE;
+			this.navigator.pushScreen(FeathersSDKManager.SCREEN_ID_INSTALL_ERROR);
+		}
+		
+		private function navigator_changeHandler(event:starling.events.Event):void
+		{
+			this._confirmCancelAlert.removeFromParent(true);
+			this.cleanUpConfirmCancelAlert();
 		}
 		
 		private function context_loadConfigurationErrorHandler(event:starling.events.Event, errorMessage:String):void

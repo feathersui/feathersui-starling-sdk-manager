@@ -22,5 +22,6 @@ package events
 		public static const PROGRESS:String = "acquireBinaryDistributionProgress";
 		public static const COMPLETE:String = "acquireBinaryDistributionComplete";
 		public static const ERROR:String = "acquireBinaryDistributionError";
+		public static const CANCEL:String = "acquireBinaryDistributionCancel";
 	}
 }

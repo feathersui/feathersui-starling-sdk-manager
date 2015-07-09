@@ -22,5 +22,6 @@ package events
 		public static const PROGRESS:String = "runInstallScriptProgress";
 		public static const COMPLETE:String = "runInstallScriptComplete";
 		public static const ERROR:String = "runInstallScriptError";
+		public static const CANCEL:String = "runInstallScriptCancel";
 	}
 }

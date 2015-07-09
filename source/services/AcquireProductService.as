@@ -46,12 +46,15 @@ package services
 	import org.as3commons.zip.ZipFile;
 	import org.robotlegs.starling.mvcs.Actor;
 
+	import starling.events.Event;
+
 	public class AcquireProductService extends Actor implements IAcquireProductService
 	{	
 		private static const ACQUISITION_IN_PROGRESS_ERROR:String = "Downloading the Feathers SDK failed. A download is already in progress.";
 		private static const NO_PRODUCT_SELECTED_ERROR:String = "Downloading the Feathers SDK failed. No version of the Feathers SDK is selected.";
 		private static const NOT_FOUND_ON_SERVER_ERROR:String = "Downloading the Feathers SDK failed. The binary distribution was not found on the server.";
 		private static const BINARY_DISTRIBUTION_NOT_FOUND_ERROR:String = "Downloading the Feathers SDK failed. Downloaded file not found.";
+		private static const DECOMPRESS_ERROR:String = "Decompressing the Feathers SDK failed.";
 		
 		private static const LOAD_PROGRESS_LABEL:String = "Downloading Feathers SDK...";
 		private static const DECOMPRESS_PROGRESS_LABEL:String = "Decompressing Feathers SDK...";
@@ -59,11 +62,11 @@ package services
 		[Inject]
 		public var sdkManagerModel:SDKManagerModel;
 		
-		private var _process:NativeProcess;
 		private var _tempDirectory:File;
-		private var _unzipDirectory:File;
-		private var _fileUnzipErrorFunction:Function;
+		private var _destinationDirectory:File;
 		private var _loader:URLLoader;
+		private var _zip:Zip;
+		private var _process:NativeProcess;
 		
 		public function get isActive():Boolean
 		{
@@ -85,6 +88,8 @@ package services
 				this.dispatchWith(AcquireProductServiceEventType.ERROR, false, NO_PRODUCT_SELECTED_ERROR);
 				return;
 			}
+			
+			this.eventDispatcher.addEventListener(AcquireProductServiceEventType.CANCEL, context_aquireProductCancelHandler);
 			
 			this._tempDirectory = File.createTempDirectory();
 			
@@ -108,7 +113,7 @@ package services
 			var url:String = this.getProductURL();
 			this._loader = new URLLoader();
 			this._loader.dataFormat = URLLoaderDataFormat.BINARY;
-			this._loader.addEventListener(Event.COMPLETE, loader_completeHandler);
+			this._loader.addEventListener(flash.events.Event.COMPLETE, loader_completeHandler);
 			this._loader.addEventListener(ProgressEvent.PROGRESS, loader_progressHandler);
 			this._loader.addEventListener(IOErrorEvent.IO_ERROR, loader_ioErrorHandler);
 			this._loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, loader_securityErrorHandler);
@@ -183,28 +188,43 @@ package services
 			}
 			if(this.sdkManagerModel.operatingSystem == SDKManagerModel.OPERATING_SYSTEM_WINDOWS) //zip
 			{
-				this._unzipDirectory = this._tempDirectory.resolvePath(selectedProduct.file);
-				this._unzipDirectory.createDirectory();
-				unzip(binaryDistribution, unzip_completeHandler, unzip_errorHandler);
+				this._destinationDirectory = this._tempDirectory.resolvePath(selectedProduct.file);
+				this._destinationDirectory.createDirectory();
+				this.unzip(binaryDistribution);
 			}
 			else //Mac and tar.gz
 			{
-				this._unzipDirectory = this._tempDirectory.resolvePath(selectedProduct.file);
-				untar(binaryDistribution, this._tempDirectory, unzip_completeHandler, unzip_errorHandler);
+				this._destinationDirectory = this._tempDirectory.resolvePath(selectedProduct.file);
+				this.untar(binaryDistribution, this._tempDirectory);
 			}
 		}
 		
 		private function cleanup():void
 		{
+			this.eventDispatcher.removeEventListener(AcquireProductServiceEventType.CANCEL, context_aquireProductCancelHandler);
 			if(this._loader)
 			{
-				this._loader.removeEventListener(Event.COMPLETE, loader_completeHandler);
+				this._loader.removeEventListener(flash.events.Event.COMPLETE, loader_completeHandler);
 				this._loader.removeEventListener(ProgressEvent.PROGRESS, loader_progressHandler);
 				this._loader.removeEventListener(IOErrorEvent.IO_ERROR, loader_ioErrorHandler);
 				this._loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, loader_securityErrorHandler);
 				this._loader = null;
 			}
-			this._unzipDirectory = null;
+			if(this._zip)
+			{
+				this._zip.close();
+				this._zip.removeEventListener(ZipEvent.FILE_LOADED, onFileLoaded);
+				this._zip.removeEventListener(flash.events.Event.COMPLETE, decompress_completeHandler);
+				this._zip.removeEventListener(ErrorEvent.ERROR, decompress_errorHandler);
+				this._zip = null;
+			}
+			if(this._process)
+			{
+				this._process.closeInput();
+				this._process.exit(true);
+				this._process = null;
+			}
+			this._destinationDirectory = null;
 			if(this._tempDirectory)
 			{
 				if(this._tempDirectory.isDirectory && this._tempDirectory.exists)
@@ -222,25 +242,20 @@ package services
 			}
 		}
 		
-		private function unzip(fileToUnzip:File, unzipCompleteFunction:Function, unzipErrorFunction:Function = null):void
+		private function unzip(fileToUnzip:File):void
 		{
 			var zipFileBytes:ByteArray = new ByteArray();
 			var fs:FileStream = new FileStream();
-			var fzip:Zip = new Zip();
+			this._zip = new Zip();
 			
 			fs.open(fileToUnzip, FileMode.READ);
 			fs.readBytes(zipFileBytes);
 			fs.close();
 			
-			fzip.addEventListener(ZipEvent.FILE_LOADED, onFileLoaded, false, 0, true);
-			fzip.addEventListener(Event.COMPLETE, unzipCompleteFunction, false, 0, true);
-			fzip.addEventListener(Event.COMPLETE, onUnzipComplete, false, 0, true);
-			if (unzipErrorFunction != null)
-			{
-				fzip.addEventListener(ErrorEvent.ERROR, unzipErrorFunction, false, 0, true);
-				_fileUnzipErrorFunction = unzipErrorFunction
-			}
-			fzip.loadBytes(zipFileBytes);
+			this._zip.addEventListener(ZipEvent.FILE_LOADED, onFileLoaded, false, 0, true);
+			this._zip.addEventListener(flash.events.Event.COMPLETE, decompress_completeHandler, false, 0, true);
+			this._zip.addEventListener(ErrorEvent.ERROR, decompress_errorHandler, false, 0, true);
+			this._zip.loadBytes(zipFileBytes);
 		}
 		
 		private function onFileLoaded(e:ZipEvent):void
@@ -248,7 +263,7 @@ package services
 			try
 			{
 				var fzf:ZipFile = e.file;
-				var f:File = this._unzipDirectory.resolvePath(fzf.filename);
+				var f:File = this._destinationDirectory.resolvePath(fzf.filename);
 				
 				if (isZipFileADirectory(fzf))
 				{
@@ -263,32 +278,24 @@ package services
 				fs.open(f, FileMode.WRITE);
 				fs.writeBytes(fzf.content);
 				fs.close();
-				
 			}
 			catch (error:Error)
 			{
-				_fileUnzipErrorFunction.call();
+				this.cleanup();
+				this.dispatchWith(AcquireProductServiceEventType.ERROR, false, DECOMPRESS_ERROR);
 			}
-		}
-		
-		private function onUnzipComplete(event:Event):void
-		{
-			var fzip:Zip = event.target as Zip;
-			fzip.close();
-			fzip.removeEventListener(ZipEvent.FILE_LOADED, onFileLoaded);
-			fzip.removeEventListener(Event.COMPLETE, onUnzipComplete);
 		}
 		
 		private function isZipFileADirectory(f:ZipFile):Boolean
 		{
-			if (f.filename.substr(f.filename.length - 1) == "/" || f.filename.substr(f.filename.length - 1) == "\\")
+			if(f.filename.substr(f.filename.length - 1) == "/" || f.filename.substr(f.filename.length - 1) == "\\")
 			{
 				return true;
 			}
 			return false;
 		}
 		
-		private function untar(source:File, destination:File, unTarCompleteCallback:Function, unTarErrorCallback:Function):void
+		private function untar(source:File, destination:File):void
 		{
 			var tar:File;
 			var startupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -312,30 +319,22 @@ package services
 			startupInfo.arguments = arguments;
 			
 			this._process = new NativeProcess();
-			this._process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, unTarErrorCallback, false, 0, true);
-			this._process.addEventListener(NativeProcessExitEvent.EXIT, unTarCompleteCallback, false, 0, true);
-			this._process.addEventListener(NativeProcessExitEvent.EXIT, untar_completeHandler, false, 0, true);
+			this._process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, decompress_errorHandler, false, 0, true);
+			this._process.addEventListener(NativeProcessExitEvent.EXIT, decompress_completeHandler, false, 0, true);
 			this._process.start(startupInfo);
 			this.dispatchWith(AcquireProductServiceEventType.PROGRESS, false, new ProgressEventData(1, DECOMPRESS_PROGRESS_LABEL));
 		}
 		
-		private function untar_completeHandler(event:NativeProcessExitEvent):void
+		private function decompress_completeHandler(event:flash.events.Event):void
 		{
-			this._process.closeInput();
-			this._process.exit(true);
-			this._process = null;
-		}
-		
-		private function unzip_completeHandler(event:Event):void
-		{
-			if(!this._unzipDirectory.exists || !this._unzipDirectory.isDirectory)
+			if(!this._destinationDirectory.exists || !this._destinationDirectory.isDirectory)
 			{
 				this.cleanup();
 				this.dispatchWith(RunInstallScriptServiceEventType.ERROR, false, BINARY_DISTRIBUTION_NOT_FOUND_ERROR);
 				return;
 			}
 			var installDirectory:File = this.sdkManagerModel.installDirectory;
-			var files:Array = this._unzipDirectory.getDirectoryListing();
+			var files:Array = this._destinationDirectory.getDirectoryListing();
 			for each(var file:File in files)
 			{
 				file.copyTo(installDirectory.resolvePath(file.name));
@@ -344,14 +343,13 @@ package services
 			this.dispatchWith(AcquireProductServiceEventType.COMPLETE);
 		}
 		
-		private function unzip_errorHandler(event:Event):void
+		private function decompress_errorHandler(event:flash.events.Event):void
 		{
-			this._process = null;
 			this.cleanup();
-			this.dispatchWith(AcquireProductServiceEventType.ERROR, false);
+			this.dispatchWith(AcquireProductServiceEventType.ERROR, false, DECOMPRESS_ERROR);
 		}
 		
-		private function loader_completeHandler(event:Event):void
+		private function loader_completeHandler(event:flash.events.Event):void
 		{
 			this.saveProductFile(this._loader.data as ByteArray);
 			this.decompress();
@@ -374,5 +372,15 @@ package services
 			this.cleanup();
 			this.dispatchWith(AcquireProductServiceEventType.ERROR, false, NOT_FOUND_ON_SERVER_ERROR);
 		}
+		
+		private function context_aquireProductCancelHandler(event:starling.events.Event):void
+		{
+			if(this._loader)
+			{
+				this._loader.close();
+			}
+			this.cleanup();
+		}
+		
 	}
 }

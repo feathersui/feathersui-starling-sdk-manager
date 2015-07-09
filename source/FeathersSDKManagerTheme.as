@@ -17,6 +17,7 @@ limitations under the License.
 package
 {
 	import feathers.controls.Button;
+	import feathers.controls.ButtonGroup;
 	import feathers.controls.Check;
 	import feathers.controls.ImageLoader;
 	import feathers.layout.AnchorLayoutData;
@@ -104,6 +105,12 @@ package
 				CustomStyleNames.ALTERNATE_STYLE_NAME_DIRECTORY_ICON_IMAGE_LOADER, setDirectoryIconImageLoaderStyles);
 			this.getStyleProviderForClass(ImageLoader).setFunctionForStyleName(
 				CustomStyleNames.ALTERNATE_STYLE_NAME_INSTALL_FAILED_ICON_IMAGE_LOADER, setInstallFailedIconImageLoaderStyles);
+		}
+		
+		override protected function setAlertButtonGroupStyles(group:ButtonGroup):void
+		{
+			super.setAlertButtonGroupStyles(group);
+			group.customLastButtonStyleName = Button.ALTERNATE_NAME_CALL_TO_ACTION_BUTTON;
 		}
 		
 		protected function setUpdateButtonStyles(button:Button):void
