@@ -61,7 +61,7 @@ package view.mediators
 		private static const NO_ACTIVE_NETWORK_ERROR:String = "Cannot install the Feathers SDK at this time. Please check your Internet connection.";
 		private static const ABORT_MESSAGE:String = "You have cancelled the installation of the Feathers SDK.";
 		
-		private static const DEFAULT_UPDATE_URL:String = "http://feathersui.com/sdk/feathers-sdk-manager/";
+		private static const DEFAULT_UPDATE_URL:String = "http://feathersui.com/sdk/download/";
 		
 		[Inject]
 		public var navigator:FeathersSDKManager;
