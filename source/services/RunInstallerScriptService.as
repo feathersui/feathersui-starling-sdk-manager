@@ -87,7 +87,8 @@ package services
 				"installer": true,
 				"do.air.install": true,
 				"do.flash.install": true,
-				"do.swfobject.install": true
+				"do.swfobject.install": true,
+				"do.fontswf.install": true
 			};
 			
 			var downloadCacheEnabled:Boolean = this.sdkManagerModel.downloadCacheEnabled;
