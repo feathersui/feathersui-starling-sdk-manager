@@ -375,8 +375,9 @@ package services
 		
 		private function loader_completeHandler(event:flash.events.Event):void
 		{
-			this.sdkManagerModel.log("Product loaded successfully.");
-			this.saveProductFile(this._loader.data as ByteArray);
+			var productData:ByteArray = this._loader.data as ByteArray;
+			this.sdkManagerModel.log("Product loaded successfully. " + productData.length + " bytes.");
+			this.saveProductFile(productData);
 			this.decompress();
 		}
 		
