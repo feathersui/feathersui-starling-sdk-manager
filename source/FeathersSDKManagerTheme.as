@@ -118,7 +118,7 @@ package
 		override protected function setAlertButtonGroupStyles(group:ButtonGroup):void
 		{
 			super.setAlertButtonGroupStyles(group);
-			group.customLastButtonStyleName = Button.ALTERNATE_NAME_CALL_TO_ACTION_BUTTON;
+			group.customLastButtonStyleName = Button.ALTERNATE_STYLE_NAME_CALL_TO_ACTION_BUTTON;
 		}
 		
 		protected function setUpdateButtonStyles(button:Button):void
