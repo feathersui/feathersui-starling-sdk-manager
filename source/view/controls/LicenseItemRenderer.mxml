@@ -16,10 +16,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <f:LayoutGroupListItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
-	xmlns:f="library://ns.feathersui.com/mxml" xmlns:utils="utils.*">
+	xmlns:f="library://ns.feathersui.com/mxml">
 	
 	<fx:Declarations>
-		<utils:TapToSelect target="{this}" tapToDeselect="true"/>
+		<f:TapToSelect target="{this}" tapToDeselect="true"/>
 	</fx:Declarations>
 	
 	<f:layout>
@@ -46,9 +46,9 @@ limitations under the License.
 
 		import utils.CustomStyleNames;
 
-		override public function hitTest(localPoint:Point, forTouch:Boolean = false):DisplayObject
+		override public function hitTest(localPoint:Point):DisplayObject
 		{
-			var result:DisplayObject = super.hitTest(localPoint, forTouch);
+			var result:DisplayObject = super.hitTest(localPoint);
 			if(result === this.viewLicenseButton)
 			{
 				return result;
