@@ -21,6 +21,7 @@ package
 	import feathers.controls.Check;
 	import feathers.controls.ImageLoader;
 	import feathers.controls.Label;
+	import feathers.controls.text.TextBlockTextRenderer;
 	import feathers.layout.AnchorLayoutData;
 	import feathers.themes.MetalWorksDesktopTheme;
 
@@ -111,8 +112,8 @@ package
 			this.getStyleProviderForClass(ImageLoader).setFunctionForStyleName(
 				CustomStyleNames.ALTERNATE_STYLE_NAME_INSTALL_FAILED_ICON_IMAGE_LOADER, setInstallFailedIconImageLoaderStyles);
 			
-			this.getStyleProviderForClass(Label).setFunctionForStyleName(
-				CustomStyleNames.ALTERNATE_STYLE_NAME_MESSAGE_LABEL, setMessageLabelStyles);
+			this.getStyleProviderForClass(TextBlockTextRenderer).setFunctionForStyleName(
+				CustomStyleNames.ALTERNATE_STYLE_NAME_MESSAGE_LABEL, setMessageLabelTextRendererStyles);
 		}
 		
 		override protected function setAlertButtonGroupStyles(group:ButtonGroup):void
@@ -164,10 +165,10 @@ package
 			loader.setSize(ICON_SIZE, ICON_SIZE);
 		}
 		
-		protected function setMessageLabelStyles(label:Label):void
+		protected function setMessageLabelTextRendererStyles(textRenderer:TextBlockTextRenderer):void
 		{
-			this.setLabelStyles(label);
-			label.textRendererProperties.textAlign = TextFormatAlign.CENTER;
+			this.setLabelTextRendererStyles(textRenderer);
+			textRenderer.textAlign = TextFormatAlign.CENTER;
 		}
 	}
 }
