@@ -23,7 +23,6 @@ package services
 
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.ErrorEvent;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.NativeProcessExitEvent;
@@ -38,10 +37,11 @@ package services
 	import flash.system.Capabilities;
 	import flash.utils.ByteArray;
 
-	import model.SDKManagerModel;
 	import model.ProductConfigurationItem;
+	import model.SDKManagerModel;
 
 	import org.as3commons.zip.Zip;
+	import org.as3commons.zip.ZipErrorEvent;
 	import org.as3commons.zip.ZipEvent;
 	import org.as3commons.zip.ZipFile;
 	import org.robotlegs.starling.mvcs.Actor;
@@ -49,7 +49,7 @@ package services
 	import starling.events.Event;
 
 	public class AcquireProductService extends Actor implements IAcquireProductService
-	{	
+	{
 		private static const ACQUISITION_IN_PROGRESS_ERROR:String = "Downloading the Feathers SDK failed. A download is already in progress.";
 		private static const NO_PRODUCT_SELECTED_ERROR:String = "Downloading the Feathers SDK failed. No version of the Feathers SDK is selected.";
 		private static const NOT_FOUND_ON_SERVER_ERROR:String = "Downloading the Feathers SDK failed. The binary distribution was not found on the server.";
@@ -222,7 +222,7 @@ package services
 				this._zip.close();
 				this._zip.removeEventListener(ZipEvent.FILE_LOADED, onFileLoaded);
 				this._zip.removeEventListener(flash.events.Event.COMPLETE, decompress_completeHandler);
-				this._zip.removeEventListener(ErrorEvent.ERROR, decompress_errorHandler);
+				this._zip.removeEventListener(ZipErrorEvent.PARSE_ERROR, decompress_errorHandler);
 				this._zip = null;
 			}
 			if(this._process)
@@ -262,8 +262,20 @@ package services
 			
 			this._zip.addEventListener(ZipEvent.FILE_LOADED, onFileLoaded, false, 0, true);
 			this._zip.addEventListener(flash.events.Event.COMPLETE, decompress_completeHandler, false, 0, true);
-			this._zip.addEventListener(ErrorEvent.ERROR, decompress_errorHandler, false, 0, true);
-			this._zip.loadBytes(zipFileBytes);
+			this._zip.addEventListener(ZipErrorEvent.PARSE_ERROR, decompress_errorHandler, false, 0, true);
+			try
+			{
+				//I discovered that an error can be thrown during loadBytes()
+				//where ZipErrorEvent.PARSE_ERROR is not dispatched
+				this._zip.loadBytes(zipFileBytes);
+			}
+			catch(error:Error)
+			{
+				this.cleanup();
+				this.sdkManagerModel.log(DECOMPRESS_ERROR);
+				this.dispatchWith(AcquireProductServiceEventType.ERROR, false, DECOMPRESS_ERROR);
+				return;
+			}
 		}
 		
 		private function onFileLoaded(e:ZipEvent):void
@@ -366,6 +378,8 @@ package services
 			this.dispatchWith(AcquireProductServiceEventType.COMPLETE);
 		}
 		
+		//this listener is used for both unzip and untar, so the event types are
+		//different, but they both extend from flash.events.Event
 		private function decompress_errorHandler(event:flash.events.Event):void
 		{
 			this.cleanup();
