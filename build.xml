@@ -127,13 +127,7 @@
 		<exec executable="${mac.codesign}">
 			<arg value="-f"/>
 			<arg value="-v"/>
-			<arg value="-s"/>
-			<arg value="${mac.application.certificate.name}"/>
-			<arg value="${output.path}/${bundle.name}${bundle.extension}/Contents/Frameworks/Adobe AIR.framework"/>
-		</exec>
-		<exec executable="${mac.codesign}">
-			<arg value="-f"/>
-			<arg value="-v"/>
+			<arg value="--deep"/>
 			<arg value="-s"/>
 			<arg value="${mac.application.certificate.name}"/>
 			<arg value="${output.path}/${bundle.name}${bundle.extension}"/>
