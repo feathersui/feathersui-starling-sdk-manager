@@ -40,7 +40,7 @@ limitations under the License.
 		<f:Label styleName="{Label.ALTERNATE_STYLE_NAME_HEADING}"
 			text="Installation Failed"/>
 		<f:ImageLoader styleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_INSTALL_FAILED_ICON_IMAGE_LOADER}"/>
-		<f:Label customTextRendererStyleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_MESSAGE_LABEL}"
+		<f:Label styleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_MESSAGE_LABEL}"
 			text="{errorMessage}" wordWrap="true">
 			<f:layoutData>
 				<f:VerticalLayoutData percentWidth="100"/>

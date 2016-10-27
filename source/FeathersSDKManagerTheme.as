@@ -29,7 +29,10 @@ package
 
 	import flash.text.engine.ElementFormat;
 
+	import starling.text.TextFormat;
+
 	import starling.textures.Texture;
+	import starling.utils.Align;
 
 	import utils.CustomStyleNames;
 
@@ -37,28 +40,28 @@ package
 	{
 		[Embed(source="/../assets/images/feathers-sdk-logo.png")]
 		private static const FEATHERS_SDK_LOGO:Class;
-		
+
 		[Embed(source="/../assets/images/feathers-folder.png")]
 		private static const FEATHERS_FOLDER_ICON:Class;
-		
+
 		[Embed(source="/../assets/images/adobe-air-logo.png")]
 		private static const ADOBE_AIR_LOGO:Class;
-		
+
 		[Embed(source="/../assets/images/install-failed-icon.png")]
 		private static const INSTALL_FAILED_ICON:Class;
-		
+
 		private static const ICON_SIZE:int = 160;
-		
+
 		public function FeathersSDKManagerTheme()
 		{
 			super();
 		}
-		
+
 		protected var sdkLogoTexture:Texture;
 		protected var adobeRuntimesLogoTexture:Texture;
 		protected var directoryTexture:Texture;
 		protected var installFailedIconTexture:Texture;
-		
+
 		override public function dispose():void
 		{
 			if(this.sdkLogoTexture)
@@ -83,7 +86,7 @@ package
 			}
 			super.dispose();
 		}
-		
+
 		override protected function initializeTextures():void
 		{
 			super.initializeTextures();
@@ -92,17 +95,17 @@ package
 			this.directoryTexture = Texture.fromEmbeddedAsset(FEATHERS_FOLDER_ICON);
 			this.installFailedIconTexture = Texture.fromEmbeddedAsset(INSTALL_FAILED_ICON);
 		}
-		
+
 		override protected function initializeStyleProviders():void
 		{
 			super.initializeStyleProviders();
-			
+
 			this.getStyleProviderForClass(Button).setFunctionForStyleName(
 				CustomStyleNames.ALTERNATE_STYLE_NAME_UPDATE_BUTTON, setUpdateButtonStyles);
-			
+
 			this.getStyleProviderForClass(Check).setFunctionForStyleName(
 				CustomStyleNames.ALTERNATE_STYLE_NAME_ITEM_RENDERER_CHECK, setItemRendererCheckStyles);
-			
+
 			this.getStyleProviderForClass(ImageLoader).setFunctionForStyleName(
 				CustomStyleNames.ALTERNATE_STYLE_NAME_FEATHERS_SDK_ICON_IMAGE_LOADER, setFeathersSDKIconImageLoaderStyles);
 			this.getStyleProviderForClass(ImageLoader).setFunctionForStyleName(
@@ -111,64 +114,66 @@ package
 				CustomStyleNames.ALTERNATE_STYLE_NAME_DIRECTORY_ICON_IMAGE_LOADER, setDirectoryIconImageLoaderStyles);
 			this.getStyleProviderForClass(ImageLoader).setFunctionForStyleName(
 				CustomStyleNames.ALTERNATE_STYLE_NAME_INSTALL_FAILED_ICON_IMAGE_LOADER, setInstallFailedIconImageLoaderStyles);
-			
-			this.getStyleProviderForClass(TextBlockTextRenderer).setFunctionForStyleName(
-				CustomStyleNames.ALTERNATE_STYLE_NAME_MESSAGE_LABEL, setMessageLabelTextRendererStyles);
+
+			this.getStyleProviderForClass(Label).setFunctionForStyleName(
+				CustomStyleNames.ALTERNATE_STYLE_NAME_MESSAGE_LABEL, setMessageLabelStyles);
 		}
-		
+
 		override protected function setAlertButtonGroupStyles(group:ButtonGroup):void
 		{
 			super.setAlertButtonGroupStyles(group);
 			group.customLastButtonStyleName = Button.ALTERNATE_STYLE_NAME_CALL_TO_ACTION_BUTTON;
 		}
-		
+
 		protected function setUpdateButtonStyles(button:Button):void
 		{
 			this.setCallToActionButtonStyles(button);
 			button.layoutData = new AnchorLayoutData(this.gutterSize, this.gutterSize);
 		}
-		
+
 		protected function setItemRendererCheckStyles(check:Check):void
 		{
 			this.setCheckStyles(check);
-			
+
 			//don't bold the fonts
-			check.defaultLabelProperties.elementFormat = this.lightElementFormat;
-			check.disabledLabelProperties.elementFormat = this.disabledElementFormat;
-			
+			check.fontStyles = this.lightFontStyles;
+			check.disabledFontStyles = this.lightDisabledFontStyles;
+
 			//use a slightly larger gap because the item renderer has bigger
 			//padding around the edges
 			check.gap = this.gutterSize;
 		}
-		
+
 		protected function setFeathersSDKIconImageLoaderStyles(loader:ImageLoader):void
 		{
 			loader.source = this.sdkLogoTexture;
 			loader.setSize(ICON_SIZE, ICON_SIZE);
 		}
-		
+
 		protected function setAdobeRuntimesIconImageLoaderStyles(loader:ImageLoader):void
 		{
 			loader.source = this.adobeRuntimesLogoTexture;
 			loader.setSize(ICON_SIZE, ICON_SIZE);
 		}
-		
+
 		protected function setDirectoryIconImageLoaderStyles(loader:ImageLoader):void
 		{
 			loader.source = this.directoryTexture;
 			loader.setSize(ICON_SIZE, ICON_SIZE);
 		}
-		
+
 		protected function setInstallFailedIconImageLoaderStyles(loader:ImageLoader):void
 		{
 			loader.source = this.installFailedIconTexture;
 			loader.setSize(ICON_SIZE, ICON_SIZE);
 		}
-		
-		protected function setMessageLabelTextRendererStyles(textRenderer:TextBlockTextRenderer):void
+
+		protected function setMessageLabelStyles(label:Label):void
 		{
-			this.setLabelTextRendererStyles(textRenderer);
-			textRenderer.textAlign = TextFormatAlign.CENTER;
+			this.setLabelStyles(label);
+			var styles:TextFormat = label.fontStyles.clone();
+			styles.horizontalAlign = Align.CENTER;
+			label.fontStyles = styles;
 		}
 	}
 }
