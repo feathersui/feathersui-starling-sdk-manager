@@ -31,12 +31,13 @@ package model
 		
 		public static const OPERATING_SYSTEM_WINDOWS:String = "windows";
 		public static const OPERATING_SYSTEM_MAC:String = "mac";
-		
+		;
 		public var installDirectory:File;
 		public var selectedProduct:ProductConfigurationItem;
 		public var selectedRuntime:RuntimeConfigurationItem;
 		public var downloadCacheEnabled:Boolean = false;
 		public var downloadCacheDirectory:File = File.applicationStorageDirectory.resolvePath("feathers_sdk_download_cache");
+		public var configurationFile:File
 		
 		private var _licenses:Vector.<LicenseItem> = new <LicenseItem>
 		[

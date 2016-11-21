@@ -97,6 +97,11 @@ package services
 				context["usingDownloadCache"] = downloadCacheEnabled;
 				context["downloadCacheFolder"] = this.sdkManagerModel.downloadCacheDirectory.nativePath;
 			}
+			var configFile:File = this.sdkManagerModel.configurationFile;
+			if(configFile && configFile.exists)
+			{
+				context["xml.properties"] = configFile.url;
+			}
 			
 			var selectedRuntime:RuntimeConfigurationItem = this.sdkManagerModel.selectedRuntime;
 			context["air.sdk.version"] = selectedRuntime.airVersionNumber;

@@ -29,10 +29,14 @@ package view.mediators
 	import feathers.data.ListCollection;
 	import feathers.layout.AnchorLayout;
 
+	import flash.desktop.NativeApplication;
+
 	import flash.display.Stage;
 	import flash.events.ContextMenuEvent;
 	import flash.events.Event;
+	import flash.events.InvokeEvent;
 	import flash.events.MouseEvent;
+	import flash.filesystem.File;
 	import flash.net.NetworkInfo;
 	import flash.net.NetworkInterface;
 	import flash.net.URLRequest;
@@ -62,6 +66,10 @@ package view.mediators
 		private static const ABORT_MESSAGE:String = "You have cancelled the installation of the Feathers SDK.";
 		
 		private static const DEFAULT_UPDATE_URL:String = "http://feathersui.com/sdk/download/";
+
+		private static const OPTION_CONFIG:String = "-config";
+		private static const OPTION_CACHE:String = "-cache";
+		private static const ERROR_CODE_BAD_OPTIONS:int = 100;
 		
 		[Inject]
 		public var navigator:FeathersSDKManager;
@@ -101,21 +109,12 @@ package view.mediators
 			this.addContextListener(RunInstallScriptServiceEventType.COMPLETE, context_runInstallerScriptCompleteHandler);
 			
 			Starling.current.nativeStage.nativeWindow.addEventListener(flash.events.Event.CLOSING, nativeWindow_closingHandler, false, 0, true);
+
+			NativeApplication.nativeApplication.addEventListener(InvokeEvent.INVOKE, nativeApplication_invokeHandler, false, 0, true);
 			
 			this.createContextMenu();
 			
 			this.sdkManagerModel.log("Feathers SDK Manager " + this.applicationVersion + " " + this.sdkManagerModel.operatingSystem);
-			
-			if(this.checkNetwork())
-			{
-				this.configService.loadConfiguration();
-			}
-			else
-			{
-				var item:StackScreenNavigatorItem = this.navigator.installError;
-				item.properties.errorMessage = NO_ACTIVE_NETWORK_ERROR;
-				this.navigator.rootScreenID = FeathersSDKManager.SCREEN_ID_INSTALL_ERROR;
-			}
 		}
 		
 		override public function onRemove():void
@@ -123,6 +122,7 @@ package view.mediators
 			var nativeStage:Stage = Starling.current.nativeStage;
 			nativeStage.nativeWindow.removeEventListener(flash.events.Event.CLOSING, nativeWindow_closingHandler);
 			nativeStage.removeEventListener(MouseEvent.RIGHT_MOUSE_DOWN, nativeStage_rightMouseDownHandler);
+			NativeApplication.nativeApplication.removeEventListener(InvokeEvent.INVOKE, nativeApplication_invokeHandler);
 		}
 		
 		private function createContextMenu():void
@@ -214,6 +214,81 @@ package view.mediators
 		{
 			this.removeViewListener(starling.events.Event.CHANGE, navigator_changeHandler);
 			this._confirmCancelAlert = null;
+		}
+		
+		private function nativeApplication_invokeHandler(event:InvokeEvent):void
+		{
+			NativeApplication.nativeApplication.removeEventListener(InvokeEvent.INVOKE, nativeApplication_invokeHandler);
+
+			var options:Array = event.arguments;
+			var optionsCount:int = options.length;
+			for(var i:int = 0; i < optionsCount; i++)
+			{
+				var option:String = options[i];
+				switch(option)
+				{
+					case OPTION_CONFIG:
+					{
+						var j:int = i + 1;
+						if(optionsCount === j)
+						{
+							trace("Missing path for: " + option);
+							NativeApplication.nativeApplication.exit(ERROR_CODE_BAD_OPTIONS);
+						}
+						var path:String = options[j];
+						var file:File = new File(path);
+						if(!file.exists)
+						{
+							trace("File does not exist: " + path);
+							NativeApplication.nativeApplication.exit(ERROR_CODE_BAD_OPTIONS);
+						}
+						this.sdkManagerModel.configurationFile = file;
+						i++;
+						break;
+					}
+					case OPTION_CACHE:
+					{
+						j = i + 1;
+						if(optionsCount === j)
+						{
+							trace("Missing path for: " + option);
+							NativeApplication.nativeApplication.exit(ERROR_CODE_BAD_OPTIONS);
+						}
+						path = options[j];
+						file = new File(path);
+						if(file.exists && !file.isDirectory)
+						{
+							trace("Download cache must be a directory: " + path);
+							NativeApplication.nativeApplication.exit(ERROR_CODE_BAD_OPTIONS);
+						}
+						else if(!file.exists)
+						{
+							file.createDirectory();
+						}
+						this.sdkManagerModel.downloadCacheEnabled = true;
+						this.sdkManagerModel.downloadCacheDirectory = file;
+						i++;
+						break;
+					}
+					default:
+					{
+						trace("Unknown option: " + option);
+						NativeApplication.nativeApplication.exit(ERROR_CODE_BAD_OPTIONS);
+						break;
+					}
+				}
+			}
+
+			if(this.checkNetwork())
+			{
+				this.configService.loadConfiguration();
+			}
+			else
+			{
+				var item:StackScreenNavigatorItem = this.navigator.installError;
+				item.properties.errorMessage = NO_ACTIVE_NETWORK_ERROR;
+				this.navigator.rootScreenID = FeathersSDKManager.SCREEN_ID_INSTALL_ERROR;
+			}
 		}
 		
 		private function updateButton_triggeredHandler(event:starling.events.Event):void

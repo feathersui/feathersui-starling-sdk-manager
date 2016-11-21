@@ -23,6 +23,7 @@ package services
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.SecurityErrorEvent;
+	import flash.filesystem.File;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
@@ -54,7 +55,13 @@ package services
 		
 		public function loadConfiguration():void
 		{
-			this.sdkManagerModel.log("Loading configuration file: " + CONFIGURATION_URL);
+			var url:String = CONFIGURATION_URL;
+			var configFile:File = this.sdkManagerModel.configurationFile;
+			if(configFile !== null && configFile.exists)
+			{
+				url = configFile.url;
+			}
+			this.sdkManagerModel.log("Loading configuration file: " + url);
 			this.dispatchWith(LoadConfigurationServiceEventType.START);
 			
 			if(this.isActive)
@@ -69,7 +76,7 @@ package services
 			this._loader.addEventListener(ProgressEvent.PROGRESS, loader_progressHandler);
 			this._loader.addEventListener(IOErrorEvent.IO_ERROR, loader_ioErrorHandler);
 			this._loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, loader_securityErrorHandler);
-			this._loader.load(new URLRequest(CONFIGURATION_URL));
+			this._loader.load(new URLRequest(url));
 		}
 		
 		private function cleanup():void
