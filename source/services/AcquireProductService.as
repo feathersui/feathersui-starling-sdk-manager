@@ -268,6 +268,9 @@ package services
 				//I discovered that an error can be thrown during loadBytes()
 				//where ZipErrorEvent.PARSE_ERROR is not dispatched
 				this._zip.loadBytes(zipFileBytes);
+				//loadBytes() is synchronous, so we can clear the ByteArray
+				//immediately to free up memory
+				zipFileBytes.clear();
 			}
 			catch(error:Error)
 			{
@@ -298,6 +301,8 @@ package services
 				fs.open(f, FileMode.WRITE);
 				fs.writeBytes(fzf.content);
 				fs.close();
+				//clean up some data
+				fzf.setContent(null);
 			}
 			catch (error:Error)
 			{
