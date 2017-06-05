@@ -40,10 +40,6 @@ package services
 	import model.ProductConfigurationItem;
 	import model.SDKManagerModel;
 
-	import org.as3commons.zip.Zip;
-	import org.as3commons.zip.ZipErrorEvent;
-	import org.as3commons.zip.ZipEvent;
-	import org.as3commons.zip.ZipFile;
 	import org.robotlegs.starling.mvcs.Actor;
 
 	import starling.events.Event;
@@ -67,7 +63,6 @@ package services
 		private var _tempDirectory:File;
 		private var _destinationDirectory:File;
 		private var _loader:URLLoader;
-		private var _zip:Zip;
 		private var _process:NativeProcess;
 		
 		public function get isActive():Boolean
@@ -193,10 +188,10 @@ package services
 				return;
 			}
 			this.sdkManagerModel.log("Decompressing product.");
+			this.dispatchWith(AcquireProductServiceEventType.PROGRESS, false, new ProgressEventData(1, DECOMPRESS_PROGRESS_LABEL));
 			if(this.sdkManagerModel.operatingSystem == SDKManagerModel.OPERATING_SYSTEM_WINDOWS) //zip
 			{
 				this._destinationDirectory = this._tempDirectory.resolvePath(selectedProduct.file);
-				this._destinationDirectory.createDirectory();
 				this.unzip(binaryDistribution);
 			}
 			else //Mac and tar.gz
@@ -216,14 +211,6 @@ package services
 				this._loader.removeEventListener(IOErrorEvent.IO_ERROR, loader_ioErrorHandler);
 				this._loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, loader_securityErrorHandler);
 				this._loader = null;
-			}
-			if(this._zip)
-			{
-				this._zip.close();
-				this._zip.removeEventListener(ZipEvent.FILE_LOADED, onFileLoaded);
-				this._zip.removeEventListener(flash.events.Event.COMPLETE, decompress_completeHandler);
-				this._zip.removeEventListener(ZipErrorEvent.PARSE_ERROR, decompress_errorHandler);
-				this._zip = null;
 			}
 			if(this._process)
 			{
@@ -250,75 +237,26 @@ package services
 			}
 		}
 		
-		private function unzip(fileToUnzip:File):void
+		private function unzip(source:File):void
 		{
-			var zipFileBytes:ByteArray = new ByteArray();
-			var fs:FileStream = new FileStream();
-			this._zip = new Zip();
+			var executable:File = new File("C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe");
+			var startupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			var arguments:Vector.<String> = new Vector.<String>();
 			
-			fs.open(fileToUnzip, FileMode.READ);
-			fs.readBytes(zipFileBytes);
-			fs.close();
+			arguments.push("Expand-Archive");
+			arguments.push("-Path");
+			arguments.push(source.nativePath);
+			arguments.push("-DestinationPath");
+			arguments.push(this._destinationDirectory.nativePath);
+			arguments.push("-Force");
 			
-			this._zip.addEventListener(ZipEvent.FILE_LOADED, onFileLoaded, false, 0, true);
-			this._zip.addEventListener(flash.events.Event.COMPLETE, decompress_completeHandler, false, 0, true);
-			this._zip.addEventListener(ZipErrorEvent.PARSE_ERROR, decompress_errorHandler, false, 0, true);
-			try
-			{
-				//I discovered that an error can be thrown during loadBytes()
-				//where ZipErrorEvent.PARSE_ERROR is not dispatched
-				this._zip.loadBytes(zipFileBytes);
-				//loadBytes() is synchronous, so we can clear the ByteArray
-				//immediately to free up memory
-				zipFileBytes.clear();
-			}
-			catch(error:Error)
-			{
-				this.cleanup();
-				this.sdkManagerModel.log(DECOMPRESS_ERROR);
-				this.dispatchWith(AcquireProductServiceEventType.ERROR, false, DECOMPRESS_ERROR);
-				return;
-			}
-		}
-		
-		private function onFileLoaded(e:ZipEvent):void
-		{
-			try
-			{
-				var fzf:ZipFile = e.file;
-				var f:File = this._destinationDirectory.resolvePath(fzf.filename);
-				
-				if (isZipFileADirectory(fzf))
-				{
-					//the directory may be empty, but we still want to keep it
-					//because certain IDEs expect specific directories to exist
-					//no matter what
-					f.createDirectory();
-					return;
-				}
+			startupInfo.executable = executable;
+			startupInfo.arguments = arguments;
 
-				var fs:FileStream = new FileStream();
-				fs.open(f, FileMode.WRITE);
-				fs.writeBytes(fzf.content);
-				fs.close();
-				//clean up some data
-				fzf.setContent(null);
-			}
-			catch (error:Error)
-			{
-				this.cleanup();
-				this.sdkManagerModel.log(DECOMPRESS_ERROR);
-				this.dispatchWith(AcquireProductServiceEventType.ERROR, false, DECOMPRESS_ERROR);
-			}
-		}
-		
-		private function isZipFileADirectory(f:ZipFile):Boolean
-		{
-			if(f.filename.substr(f.filename.length - 1) == "/" || f.filename.substr(f.filename.length - 1) == "\\")
-			{
-				return true;
-			}
-			return false;
+			this._process = new NativeProcess();
+			this._process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, decompress_errorHandler, false, 0, true);
+			this._process.addEventListener(NativeProcessExitEvent.EXIT, decompress_completeHandler, false, 0, true);
+			this._process.start(startupInfo);
 		}
 		
 		private function untar(source:File, destination:File):void
@@ -348,10 +286,9 @@ package services
 			this._process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, decompress_errorHandler, false, 0, true);
 			this._process.addEventListener(NativeProcessExitEvent.EXIT, decompress_completeHandler, false, 0, true);
 			this._process.start(startupInfo);
-			this.dispatchWith(AcquireProductServiceEventType.PROGRESS, false, new ProgressEventData(1, DECOMPRESS_PROGRESS_LABEL));
 		}
 		
-		private function decompress_completeHandler(event:flash.events.Event):void
+		private function decompress_completeHandler(event:NativeProcessExitEvent):void
 		{
 			if(!this._destinationDirectory.exists || !this._destinationDirectory.isDirectory)
 			{
@@ -383,8 +320,6 @@ package services
 			this.dispatchWith(AcquireProductServiceEventType.COMPLETE);
 		}
 		
-		//this listener is used for both unzip and untar, so the event types are
-		//different, but they both extend from flash.events.Event
 		private function decompress_errorHandler(event:flash.events.Event):void
 		{
 			this.cleanup();
