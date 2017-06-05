@@ -21,7 +21,7 @@ package view.mediators
 	import events.RunInstallScriptServiceEventType;
 
 	import feathers.controls.Alert;
-
+	import feathers.controls.AutoSizeMode;
 	import feathers.controls.Button;
 	import feathers.controls.LayoutGroup;
 	import feathers.controls.StackScreenNavigatorItem;
@@ -30,7 +30,6 @@ package view.mediators
 	import feathers.layout.AnchorLayout;
 
 	import flash.desktop.NativeApplication;
-
 	import flash.display.Stage;
 	import flash.events.ContextMenuEvent;
 	import flash.events.Event;
@@ -49,7 +48,6 @@ package view.mediators
 	import org.robotlegs.starling.mvcs.Mediator;
 
 	import services.IAcquireProductService;
-
 	import services.ILoadConfigurationService;
 	import services.IRunInstallerScriptService;
 
@@ -187,7 +185,7 @@ package view.mediators
 			if(hasUpdate)
 			{
 				var container:LayoutGroup = new LayoutGroup();
-				container.autoSizeMode = LayoutGroup.AUTO_SIZE_MODE_STAGE;
+				container.autoSizeMode = AutoSizeMode.STAGE;
 				container.layout = new AnchorLayout();
 				var updateButton:Button = new Button();
 				updateButton.styleNameList.add(CustomStyleNames.ALTERNATE_STYLE_NAME_UPDATE_BUTTON);
