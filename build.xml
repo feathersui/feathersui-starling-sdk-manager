@@ -88,6 +88,8 @@
 		<echo message="Packaging ${bundle.name}${bundle.extension}"/>
 		<java jar="${adt}" dir="${basedir}" fork="true" failonerror="true">
 			<arg value="-package"/>
+			<arg value="-tsa"/>
+			<arg value="http://sha256timestamp.ws.symantec.com/sha256/timestamp"/>
 			<arg value="-storetype"/>
 			<arg value="pkcs12"/>
 			<arg value="-keystore"/>
