@@ -203,12 +203,12 @@ package services
 		{
 			var progressLabel:String = "Installing...";
 			var progressValue:Number = Number.POSITIVE_INFINITY;
-			if(event.bytesTotal !== 0)
+			var progressClass:Object = this._ant.progressClass;
+			if(progressClass && event.bytesTotal !== 0)
 			{
 				progressValue = event.bytesLoaded / event.bytesTotal;
 			}
-			var progressClass:Object = this._ant.progressClass;
-			if(progressValue < 1 && progressClass)
+			if(progressValue < 1)
 			{
 				//we check for < 1 because we want to switch to the spinner
 				//animation once we finish the current task with progress
