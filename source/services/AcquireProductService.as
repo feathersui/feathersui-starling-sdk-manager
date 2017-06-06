@@ -245,12 +245,27 @@ package services
 			var startupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			var arguments:Vector.<String> = new Vector.<String>();
 			
+			var command:String = "& {";
+			command += "Param([string]$zipPath,[string]$outPath)$shell = New-Object -ComObject shell.application;$zip = $shell.NameSpace($zipPath);New-Item -path $outPath -type directory -force;$shell.NameSpace($outPath).CopyHere($zip.items(), 4 + 16)";
+			command += "}";
+			command += " ";
+			command += "\"";
+			command += source.nativePath;
+			command += "\"";
+			command += " ";
+			command += "\"";
+			command += this._destinationDirectory.nativePath;
+			command += "\"";
+			arguments.push("-Command");
+			arguments.push(command);
+			/*//with PowerShell 5, the command is much simpler,
+			//but we need support for older versions of Windows
 			arguments.push("Expand-Archive");
 			arguments.push("-Path");
 			arguments.push(source.nativePath);
 			arguments.push("-DestinationPath");
 			arguments.push(this._destinationDirectory.nativePath);
-			arguments.push("-Force");
+			arguments.push("-Force");*/
 			
 			startupInfo.executable = executable;
 			startupInfo.arguments = arguments;
