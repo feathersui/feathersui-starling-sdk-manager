@@ -24,7 +24,12 @@ limitations under the License.
 	</f:layout>
 	
 	<f:Label id="progressTitleLabel" styleName="{Label.ALTERNATE_STYLE_NAME_HEADING}" text="{progressTitle}"/>
-	<f:ProgressBar minimum="0" maximum="1" value="{progressValue}"/>
+	<f:ProgressBar minimum="0" maximum="1" value="{progressValue}"
+		includeInLayout="{progressValue !== Number.POSITIVE_INFINITY}"
+		visible="{progressValue !== Number.POSITIVE_INFINITY}"/>
+	<f:LayoutGroup id="spinnerGroup" styleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_SPINNER_GROUP}"
+		includeInLayout="{progressValue === Number.POSITIVE_INFINITY}"
+		visible="{progressValue === Number.POSITIVE_INFINITY}"/>
 	<f:Label id="progressLabel" styleName="{CustomStyleNames.ALTERNATE_STYLE_NAME_MESSAGE_LABEL}"
 		text="{progressText}" wordWrap="true">
 		<f:layoutData>

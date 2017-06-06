@@ -188,7 +188,9 @@ package services
 				return;
 			}
 			this.sdkManagerModel.log("Decompressing product.");
-			this.dispatchWith(AcquireProductServiceEventType.PROGRESS, false, new ProgressEventData(1, DECOMPRESS_PROGRESS_LABEL));
+			//we can't display progress on expanding the archive, so this will
+			//make the UI display a spinner animation
+			this.dispatchWith(AcquireProductServiceEventType.PROGRESS, false, new ProgressEventData(Number.POSITIVE_INFINITY, DECOMPRESS_PROGRESS_LABEL));
 			if(this.sdkManagerModel.operatingSystem == SDKManagerModel.OPERATING_SYSTEM_WINDOWS) //zip
 			{
 				this._destinationDirectory = this._tempDirectory.resolvePath(selectedProduct.file);

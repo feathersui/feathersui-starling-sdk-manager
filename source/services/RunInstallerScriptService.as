@@ -201,15 +201,17 @@ package services
 		
 		private function ant_progressHandler(event:ProgressEvent):void
 		{
-			if(event.bytesTotal === 0)
-			{
-				return;
-			}
 			var progressLabel:String = "Installing...";
-			var progressValue:Number = event.bytesLoaded / event.bytesTotal;
+			var progressValue:Number = Number.POSITIVE_INFINITY;
+			if(event.bytesTotal !== 0)
+			{
+				progressValue = event.bytesLoaded / event.bytesTotal;
+			}
 			var progressClass:Object = this._ant.progressClass;
 			if(progressValue < 1 && progressClass)
 			{
+				//we check for < 1 because we want to switch to the spinner
+				//animation once we finish the current task with progress
 				switch(progressClass.constructor)
 				{
 					case Copy:
@@ -228,10 +230,6 @@ package services
 						break;
 					}
 				}
-			}
-			else
-			{
-				progressValue = 0;
 			}
 			this.dispatchWith(RunInstallScriptServiceEventType.PROGRESS, false,
 				new ProgressEventData(progressValue, progressLabel));

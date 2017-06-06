@@ -21,20 +21,22 @@ package
 	import feathers.controls.Check;
 	import feathers.controls.ImageLoader;
 	import feathers.controls.Label;
+	import feathers.controls.LayoutGroup;
 	import feathers.controls.text.TextBlockTextRenderer;
 	import feathers.layout.AnchorLayoutData;
 	import feathers.themes.MetalWorksDesktopTheme;
 
 	import flash.text.TextFormatAlign;
-
 	import flash.text.engine.ElementFormat;
 
+	import starling.display.MovieClip;
 	import starling.text.TextFormat;
-
 	import starling.textures.Texture;
+	import starling.textures.TextureAtlas;
 	import starling.utils.Align;
 
 	import utils.CustomStyleNames;
+	import starling.core.Starling;
 
 	public class FeathersSDKManagerTheme extends MetalWorksDesktopTheme
 	{
@@ -50,6 +52,12 @@ package
 		[Embed(source="/../assets/images/install-failed-icon.png")]
 		private static const INSTALL_FAILED_ICON:Class;
 
+		[Embed(source="/../assets/images/spinner.png")]
+		private static const SPINNER_ATLAS_IMAGE:Class;
+
+		[Embed(source="/../assets/images/spinner.xml",mimeType="application/octet-stream")]
+		private static const SPINNER_ATLAS_XML:Class;
+
 		private static const ICON_SIZE:int = 160;
 
 		public function FeathersSDKManagerTheme()
@@ -61,9 +69,15 @@ package
 		protected var adobeRuntimesLogoTexture:Texture;
 		protected var directoryTexture:Texture;
 		protected var installFailedIconTexture:Texture;
+		protected var spinnerAtlas:TextureAtlas;
 
 		override public function dispose():void
 		{
+			if(this.spinnerAtlas)
+			{
+				this.spinnerAtlas.dispose();
+				this.spinnerAtlas = null;
+			}
 			if(this.sdkLogoTexture)
 			{
 				this.sdkLogoTexture.dispose();
@@ -94,11 +108,17 @@ package
 			this.adobeRuntimesLogoTexture = Texture.fromEmbeddedAsset(ADOBE_AIR_LOGO);
 			this.directoryTexture = Texture.fromEmbeddedAsset(FEATHERS_FOLDER_ICON);
 			this.installFailedIconTexture = Texture.fromEmbeddedAsset(INSTALL_FAILED_ICON);
+			var spinnerTexture:Texture = Texture.fromEmbeddedAsset(SPINNER_ATLAS_IMAGE, false, false, 2);
+			var spinnerXML:XML = new XML(new SPINNER_ATLAS_XML());
+			this.spinnerAtlas = new TextureAtlas(spinnerTexture, spinnerXML);
 		}
 
 		override protected function initializeStyleProviders():void
 		{
 			super.initializeStyleProviders();
+
+			this.getStyleProviderForClass(LayoutGroup).setFunctionForStyleName(
+				CustomStyleNames.ALTERNATE_STYLE_NAME_SPINNER_GROUP, this.setSpinnerGroupStyles);
 
 			this.getStyleProviderForClass(Button).setFunctionForStyleName(
 				CustomStyleNames.ALTERNATE_STYLE_NAME_UPDATE_BUTTON, setUpdateButtonStyles);
@@ -174,6 +194,13 @@ package
 			var styles:TextFormat = label.fontStyles.clone();
 			styles.horizontalAlign = Align.CENTER;
 			label.fontStyles = styles;
+		}
+
+		protected function setSpinnerGroupStyles(group:LayoutGroup):void
+		{
+			var backgroundSkin:MovieClip = new MovieClip(this.spinnerAtlas.getTextures());
+			Starling.juggler.add(backgroundSkin);
+			group.backgroundSkin = backgroundSkin;
 		}
 	}
 }

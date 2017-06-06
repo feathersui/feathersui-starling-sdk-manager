@@ -25,5 +25,6 @@ package utils
 		public static const ALTERNATE_STYLE_NAME_ITEM_RENDERER_CHECK:String = "feathers-sdk-manager-item-renderer-check";
 		public static const ALTERNATE_STYLE_NAME_INSTALL_FAILED_ICON_IMAGE_LOADER:String = "feathers-sdk-manager-install-failed-icon-image-loader";
 		public static const ALTERNATE_STYLE_NAME_MESSAGE_LABEL:String = "feathers-sdk-manager-message-label";
+		public static const ALTERNATE_STYLE_NAME_SPINNER_GROUP:String = "feathers-sdk-manager-spinner-group";
 	}
 }
