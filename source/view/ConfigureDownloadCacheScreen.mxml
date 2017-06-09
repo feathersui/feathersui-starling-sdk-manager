@@ -60,12 +60,12 @@ limitations under the License.
 		<f:layoutData>
 			<f:AnchorLayoutData right="0" bottom="0" left="0"/>
 		</f:layoutData>
-		<f:leftItems>
+		<f:rightItems>
 			<fx:Vector type="starling.display.DisplayObject">
-				<f:Button id="saveButton" styleName="{Button.ALTERNATE_STYLE_NAME_BACK_BUTTON}"
-					label="Save" triggered="saveButton_triggeredHandler(event)"/>
+				<f:Button id="saveButton" label="Save"
+					triggered="saveButton_triggeredHandler(event)"/>
 			</fx:Vector>
-		</f:leftItems>
+		</f:rightItems>
 	</f:Header>
 	
 	<fx:Script><![CDATA[
