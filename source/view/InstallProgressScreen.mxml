@@ -41,7 +41,7 @@ limitations under the License.
 		import utils.CustomStyleNames;
 
 		[Bindable]
-		public var progressValue:Number = 0;
+		public var progressValue:Number = Number.POSITIVE_INFINITY;
 		
 		[Bindable]
 		public var progressText:String;

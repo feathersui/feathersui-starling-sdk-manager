@@ -46,7 +46,7 @@ package view.mediators
 		override public function onRegister():void
 		{
 			this.updateTitle();
-			this.screen.progressValue = 0;
+			this.screen.progressValue = Number.POSITIVE_INFINITY;
 			this.screen.progressText = null;
 			this.addContextListener(AcquireProductServiceEventType.START, context_acquireBinaryDistributionStartHandler);
 			this.addContextListener(AcquireProductServiceEventType.PROGRESS, context_acquireBinaryDistributionProgressHandler);

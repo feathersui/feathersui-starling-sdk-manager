@@ -43,6 +43,7 @@ package services
 		private static const MISSING_SCRIPT_ERROR:String = "Installation of the Feathers SDK failed. Cannot find SDK installer script.";
 		private static const UNKNOWN_ERROR:String = "Installation of the Feathers SDK failed due to an unexpected error.";
 		
+		private static const DEFAULT_PROGRESS_LABEL:String = "Installing...";
 		private static const COPY_TASK_PROGRESS_LABEL:String = "Copying files...";
 		private static const GET_TASK_PROGRESS_LABEL:String = "Downloading file...";
 		private static const CHECKSUM_TASK_PROGRESS_LABEL:String = "Verifying checksum...";
@@ -201,12 +202,18 @@ package services
 		
 		private function ant_progressHandler(event:ProgressEvent):void
 		{
-			var progressLabel:String = "Installing...";
+			var progressLabel:String = DEFAULT_PROGRESS_LABEL;
 			var progressValue:Number = Number.POSITIVE_INFINITY;
 			var progressClass:Object = this._ant.progressClass;
 			if(progressClass && event.bytesTotal !== 0)
 			{
 				progressValue = event.bytesLoaded / event.bytesTotal;
+				if(progressValue === 1)
+				{
+					//we're done with this task, we don't want to display
+					//progress anymore
+					progressValue = Number.POSITIVE_INFINITY;
+				}
 			}
 			if(progressValue < 1)
 			{
