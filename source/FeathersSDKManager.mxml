@@ -26,6 +26,13 @@ limitations under the License.
 	
 	<f:pushTransition>{Slide.createSlideLeftTransition()}</f:pushTransition>
 	<f:popTransition>{Slide.createSlideRightTransition()}</f:popTransition>
+
+	<f:StackScreenNavigatorItem id="startup">
+		<fx:Class>view.StartupScreen</fx:Class>
+		<f:pushEvents>
+			<fx:Object complete="{SCREEN_ID_STARTUP}"/>
+		</f:pushEvents>
+	</f:StackScreenNavigatorItem>
 	
 	<!-- Step 1: Choose which binary distribution to download. -->
 	<f:StackScreenNavigatorItem id="chooseProduct">
@@ -116,6 +123,7 @@ limitations under the License.
 		import feathers.motion.Reveal;
 		import feathers.motion.Slide;
 
+		public static const SCREEN_ID_STARTUP:String = "startup";
 		public static const SCREEN_ID_CHOOSE_PRODUCT:String = "chooseProduct";
 		public static const SCREEN_ID_CHOOSE_RUNTIME:String = "chooseRuntime";
 		public static const SCREEN_ID_CHOOSE_INSTALL_DIRECTORY:String = "chooseInstallDirectory";

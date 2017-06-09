@@ -28,6 +28,7 @@ package view.mediators
 	import feathers.core.PopUpManager;
 	import feathers.data.ListCollection;
 	import feathers.layout.AnchorLayout;
+	import feathers.motion.Fade;
 
 	import flash.desktop.NativeApplication;
 	import flash.display.Stage;
@@ -111,6 +112,8 @@ package view.mediators
 			NativeApplication.nativeApplication.addEventListener(InvokeEvent.INVOKE, nativeApplication_invokeHandler, false, 0, true);
 			
 			this.createContextMenu();
+
+			this.navigator.rootScreenID = FeathersSDKManager.SCREEN_ID_STARTUP;
 			
 			this.sdkManagerModel.log("Feathers SDK Manager " + this.applicationVersion + " " + this.sdkManagerModel.operatingSystem);
 		}
@@ -361,7 +364,7 @@ package view.mediators
 		{
 			this.checkForUpdate();
 			this._allowContextMenu = true;
-			this.navigator.rootScreenID = FeathersSDKManager.SCREEN_ID_CHOOSE_PRODUCT;
+			this.navigator.pushScreen(FeathersSDKManager.SCREEN_ID_CHOOSE_PRODUCT, null, Fade.createFadeOutTransition());
 		}
 		
 		private function context_acquireBinaryDistributionStartHandler(event:starling.events.Event):void
