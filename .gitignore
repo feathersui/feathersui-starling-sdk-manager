@@ -22,3 +22,6 @@ html-template/
 .idea/
 archive/
 *.lnk
+bin/
+external/
+.vscode/
