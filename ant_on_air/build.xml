@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="ant_on_air" default="swc" basedir=".">
+	
+	<!-- build.local.properties and sdk.local.proprties are optional files that
+		can be used to override the default properties. -->
+	<property file="./sdk.local.properties"/>
+	<property file="./build.local.properties"/>
+	<property file="./sdk.properties"/>
+	<property name="output.path" value="${basedir}/bin"/>
+
+	<target name="swc" depends="-prepare,-dependencies,-swc" description="builds ant_on_air.swc"/>
+
+	<target name="-prepare">
+		<delete dir="${output.path}"/>
+	</target>
+
+    <target name="-dependencies">
+    	<mkdir dir="${basedir}/external/libs"/>
+        <get src="https://github.com/bigosmallm/MakeApacheFlexForFlashBuilder/blob/master/libs/as3commons-zip-1.0.0-alpha.1.swc?raw=true"
+        dest="${basedir}/external/libs/as3commons-zip-1.0.0-alpha.1.swc"
+        verbose="true"/>
+        <mkdir dir="${basedir}/external/de/ketzler/utils" />
+        <get src="https://raw.githubusercontent.com/thdtjsdn/as3-simple-untar/master/src/de/ketzler/utils/SimpleUntar.as" dest="${basedir}/external/de/ketzler/utils/SimpleUntar.as" skipexisting="true" />
+        <mkdir dir="${basedir}/external/de/ketzler/utils/untar" />
+        <get src="https://raw.githubusercontent.com/thdtjsdn/as3-simple-untar/master/src/de/ketzler/utils/untar/UntarFileInfo.as" dest="${basedir}/external/de/ketzler/utils/untar/UntarFileInfo.as" skipexisting="true" />
+        <get src="https://raw.githubusercontent.com/thdtjsdn/as3-simple-untar/master/src/de/ketzler/utils/untar/UntarHeaderBlock.as" dest="${basedir}/external/de/ketzler/utils/untar/UntarHeaderBlock.as" skipexisting="true" />
+        <mkdir dir="${basedir}/external/com/probertson/utils" />
+        <get src="https://raw.githubusercontent.com/Bancakan20/ascompress/master/src/com/probertson/utils/CRC32Generator.as" dest="${basedir}/external/com/probertson/utils/CRC32Generator.as" skipexisting="true" />
+        <get src="https://raw.githubusercontent.com/Bancakan20/ascompress/master/src/com/probertson/utils/GZIPBytesEncoder.as" dest="${basedir}/external/com/probertson/utils/GZIPBytesEncoder.as" skipexisting="true" />
+        <get src="https://raw.githubusercontent.com/Bancakan20/ascompress/master/src/com/probertson/utils/GZIPEncoder.as" dest="${basedir}/external/com/probertson/utils/GZIPEncoder.as" skipexisting="true" />
+        <get src="https://raw.githubusercontent.com/Bancakan20/ascompress/master/src/com/probertson/utils/GZIPFile.as" dest="${basedir}/external/com/probertson/utils/GZIPFile.as" skipexisting="true" />
+    </target>
+
+	<target name="-swc">
+		<echo message="Building ant_on_air.swc"/>
+		<java jar="${compc}" dir="${basedir}" fork="true" failonerror="true">
+			<arg value="+flexlib=${frameworks.root}"/>
+			<arg value="+configname=air"/>
+			<arg value="-source-path+=src"/>
+			<arg value="-source-path+=locale/{locale}"/>
+			<arg value="-source-path+=external"/>
+			<arg value="-library-path+=external/libs"/>
+			<arg value="-include-sources+=src"/>
+			<arg value="-output=${output.path}/ant_on_air.swc"/>
+		</java>
+	</target>
+</project>
