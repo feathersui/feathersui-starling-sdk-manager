@@ -41,7 +41,7 @@ package services
 		
 		private static const LOAD_PROGRESS_LABEL:String = "Loading configuration data...";
 		
-		public static const CONFIGURATION_URL:String = "http://feathersui.com/sdk/feathers-sdk-manager/sdk-manager-config-1.0.xml";
+		public static const CONFIGURATION_URL:String = "https://feathersui.com/sdk/feathers-sdk-manager/sdk-manager-config-1.0.xml";
 		
 		[Inject]
 		public var sdkManagerModel:SDKManagerModel;
