@@ -116,11 +116,11 @@ Section "FeathersSDKManager" SecFeathersSDKManager
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"Publisher" "Bowler Hat LLC"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
-		"URLInfoAbout" "http://feathersui.com/sdk/"
+		"URLInfoAbout" "https://feathersui.com/sdk/"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"DisplayVersion" "${VERSION}"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
-		"HelpLink" "http://feathersui.com/help/sdk/"
+		"HelpLink" "https://feathersui.com/help/sdk/"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
 		"DisplayIcon" "$\"$INSTDIR\Feathers SDK Manager.exe$\""
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.feathersui.FeathersSDKManager" \
