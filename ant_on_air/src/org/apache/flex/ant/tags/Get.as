@@ -27,7 +27,6 @@ package org.apache.flex.ant.tags
     import flash.filesystem.FileMode;
     import flash.filesystem.FileStream;
     import flash.net.LocalConnection;
-    import flash.net.URLLoader;
     import flash.net.URLLoaderDataFormat;
     import flash.net.URLRequest;
     import flash.net.URLRequestHeader;
@@ -37,6 +36,7 @@ package org.apache.flex.ant.tags
     
     import org.apache.flex.ant.Ant;
     import org.apache.flex.ant.tags.supportClasses.TaskHandler;
+    import flash.net.URLStream;
     
     [ResourceBundle("ant")]
     [Mixin]
@@ -77,7 +77,7 @@ package org.apache.flex.ant.tags
 			return getAttributeValue("@ignoreerrors") == "true";
 		}
 		
-        private var urlLoader:URLLoader;
+        private var urlStream:URLStream;
         
         private var lastProgress:ProgressEvent;
         
@@ -97,11 +97,15 @@ package org.apache.flex.ant.tags
             {
             }
             
-            if (skipexisting)
+            var destFile:File = getDestFile();
+            if(destFile.exists)
             {
-                var destFile:File = getDestFile();
-                if (destFile.exists)
+                if (skipexisting)
+                {
                     return true;
+                }
+                //delete the file if it exists already
+                destFile.deleteFile();
             }
             var s:String = ResourceManager.getInstance().getString('ant', 'GETTING');
             s = s.replace("%1", src);
@@ -115,14 +119,13 @@ package org.apache.flex.ant.tags
             urlRequest.followRedirects = false;
             urlRequest.manageCookies = false;
             urlRequest.userAgent = "Java";	// required to get sourceforge redirects to do the right thing
-            urlLoader = new URLLoader();
-            urlLoader.load(urlRequest);
-            urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
-            urlLoader.addEventListener(Event.COMPLETE, completeHandler);
-            urlLoader.addEventListener(HTTPStatusEvent.HTTP_RESPONSE_STATUS, statusHandler);
-            urlLoader.addEventListener(ProgressEvent.PROGRESS, progressHandler);
-            urlLoader.addEventListener(IOErrorEvent.IO_ERROR, ioErrorEventHandler);
-            urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+            urlStream = new URLStream();
+            urlStream.load(urlRequest);
+            urlStream.addEventListener(Event.COMPLETE, completeHandler);
+            urlStream.addEventListener(HTTPStatusEvent.HTTP_RESPONSE_STATUS, statusHandler);
+            urlStream.addEventListener(ProgressEvent.PROGRESS, progressHandler);
+            urlStream.addEventListener(IOErrorEvent.IO_ERROR, ioErrorEventHandler);
+            urlStream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
             return false;
         }
         
@@ -132,14 +135,14 @@ package org.apache.flex.ant.tags
             {
                 // redirect response
                 
-                urlLoader.close();
+                urlStream.close();
                 
                 // remove handlers from old request
-                urlLoader.removeEventListener(Event.COMPLETE, completeHandler);
-                urlLoader.removeEventListener(HTTPStatusEvent.HTTP_RESPONSE_STATUS, statusHandler);
-                urlLoader.removeEventListener(ProgressEvent.PROGRESS, progressHandler);
-                urlLoader.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorEventHandler);
-                urlLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+                urlStream.removeEventListener(Event.COMPLETE, completeHandler);
+                urlStream.removeEventListener(HTTPStatusEvent.HTTP_RESPONSE_STATUS, statusHandler);
+                urlStream.removeEventListener(ProgressEvent.PROGRESS, progressHandler);
+                urlStream.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorEventHandler);
+                urlStream.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
                 
                 var newlocation:String;
                 for each (var header:URLRequestHeader in event.responseHeaders)
@@ -172,14 +175,13 @@ package org.apache.flex.ant.tags
                     urlRequest.manageCookies = false;
                     urlRequest.followRedirects = false;
                     urlRequest.userAgent = "Java";	// required to get sourceforge redirects to do the right thing
-                    urlLoader = new URLLoader();
-                    urlLoader.load(urlRequest);
-                    urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
-                    urlLoader.addEventListener(Event.COMPLETE, completeHandler);
-                    urlLoader.addEventListener(HTTPStatusEvent.HTTP_RESPONSE_STATUS, statusHandler);
-                    urlLoader.addEventListener(ProgressEvent.PROGRESS, progressHandler);
-                    urlLoader.addEventListener(IOErrorEvent.IO_ERROR, ioErrorEventHandler);
-                    urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+                    urlStream = new URLStream();
+                    urlStream.load(urlRequest);
+                    urlStream.addEventListener(Event.COMPLETE, completeHandler);
+                    urlStream.addEventListener(HTTPStatusEvent.HTTP_RESPONSE_STATUS, statusHandler);
+                    urlStream.addEventListener(ProgressEvent.PROGRESS, progressHandler);
+                    urlStream.addEventListener(IOErrorEvent.IO_ERROR, ioErrorEventHandler);
+                    urlStream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
                 }
             }
         }
@@ -197,7 +199,7 @@ package org.apache.flex.ant.tags
 			}
             dispatchEvent(new Event(Event.COMPLETE));
             event.preventDefault();
-			urlLoader = null;
+			urlStream = null;
         }
         
         private function securityErrorHandler(event:SecurityErrorEvent):void
@@ -210,11 +212,22 @@ package org.apache.flex.ant.tags
 			}
             dispatchEvent(new Event(Event.COMPLETE));
             event.preventDefault();
-			urlLoader = null;
+			urlStream = null;
         }
         
         private function progressHandler(event:ProgressEvent):void
         {
+            var bytes:ByteArray = new ByteArray();
+            urlStream.readBytes(bytes, 0, urlStream.bytesAvailable);
+            var destFile:File = getDestFile();
+            if (destFile)
+            {
+                var fs:FileStream = new FileStream();
+                fs.open(destFile, FileMode.APPEND);
+                fs.writeBytes(bytes);
+                fs.close();
+            }
+
             lastProgress = event;
             ant.progressClass = this;
             ant.dispatchEvent(event);
@@ -222,17 +235,8 @@ package org.apache.flex.ant.tags
         
         private function completeHandler(event:Event):void
         {
-            var destFile:File = getDestFile();
-            if (destFile)
-            {
-                var fs:FileStream = new FileStream();
-                fs.open(destFile, FileMode.WRITE);
-                fs.writeBytes(urlLoader.data as ByteArray);
-                fs.close();
-            }
-
             dispatchEvent(new Event(Event.COMPLETE));
-			urlLoader = null;
+			urlStream = null;
         }
         
         private function getDestFile():File
