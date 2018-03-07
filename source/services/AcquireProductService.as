@@ -246,8 +246,15 @@ package services
 			var arguments:Vector.<String> = new Vector.<String>();
 			
 			var command:String = "& {";
-			command += "Param([string]$zipPath,[string]$outPath)$shell = New-Object -ComObject shell.application;$zip = $shell.NameSpace($zipPath);New-Item -path $outPath -type directory -force;$shell.NameSpace($outPath).CopyHere($zip.items(), 4 + 16);[Environment]::Exit(0);";
-			command += "}";
+			command += "Param([string]$zipPath,[string]$outPath)"
+            //newer versions of PowerShell support the Expand-Archive cmdlet
+            command += "if (Get-Command Expand-Archive -errorAction SilentlyContinue) {";
+            command += "Expand-Archive -Path \"" + source.nativePath + "\" -DestinationPath \"" + this._destinationDirectory.nativePath + "\" -Force;";
+            //older versions of PowerShell must fall back to COM object APIs
+            command += "} else {"
+            command += "$shell = New-Object -ComObject shell.application;$zip = $shell.NameSpace($zipPath);New-Item -path $outPath -type directory -force;$shell.NameSpace($outPath).CopyHere($zip.items(), 4 + 16);[Environment]::Exit(0);";
+            command += "}" //end else
+			command += "}"; //end $ {
 			command += " ";
 			command += "\"";
 			command += source.nativePath;
