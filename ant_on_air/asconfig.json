@@ -1,0 +1,18 @@
+{
+	"config": "air",
+	"type": "lib",
+	"compilerOptions": {
+		"source-path": [
+			"src",
+			"external",
+			"locale/en_US"
+		],
+		"include-sources": [
+			"src"
+		],
+		"library-path": [
+			"external/libs"
+		],
+		"output": "../libraries/ant_on_air.swc"
+	}
+}
