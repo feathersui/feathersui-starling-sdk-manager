@@ -1,0 +1,63 @@
+{
+	"config": "air",
+	"compilerOptions": {
+		"define": [
+			{
+				"name": "CONFIG::USE_ANALYTICS",
+				"value": false
+			},
+			{
+				"name": "CONFIG::ANALYTICS_TRACKING_ID",
+				"value": "\"fake\""
+			}
+		],
+		"library-path": [
+			"libraries",
+			"${flexlib}/themes/MetalWorksDesktopTheme/MetalWorksDesktopTheme.swc"
+		],
+		"output": "output/FeathersSDKManager.swf"
+	},
+	"files": [
+		"source/FeathersSDKManager.mxml"
+	],
+	"application": "source/FeathersSDKManager-app.xml",
+	"airOptions": {
+		"files": [
+			{
+				"file": "assets/icons/icon16.png",
+				"path": "icon16.png"
+			},
+			{
+				"file": "assets/icons/icon32.png",
+				"path": "icon32.png"
+			},
+			{
+				"file": "assets/icons/icon48.png",
+				"path": "icon48.png"
+			},
+			{
+				"file": "assets/icons/icon128.png",
+				"path": "icon128.png"
+			},
+			{
+				"file": "assets/icons/icon512.png",
+				"path": "icon512.png"
+			}
+		],
+		"output": "output/FeathersSDKManager.air",
+		"mac": {
+			"signingOptions": {
+				"storetype": "pkcs12",
+				"keystore": "signing/bowlerhatllc_20150625.p12"
+			},
+			"output": "output/FeathersSDKManager.app"
+		},
+		"windows": {
+			"signingOptions": {
+				"storetype": "pkcs12",
+				"keystore": "signing/bowlerhatllc_20150625.p12"
+			},
+			"output": "output/FeathersSDKManager"
+		}
+	}
+}
