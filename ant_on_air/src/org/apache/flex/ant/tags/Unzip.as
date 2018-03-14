@@ -143,7 +143,7 @@ package org.apache.flex.ant.tags
         private function winUnzip(source:File):void {
             var executable:File = new File("C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe");
             var startupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-            var arguments:Vector.<String> = new Vector.<String>();
+            var arguments:Vector.<String> = new <String>["-NoProfile"];
 
 			var command:String = "& {";
 			command += "Param([string]$zipPath,[string]$outPath)"

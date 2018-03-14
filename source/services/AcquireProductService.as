@@ -43,6 +43,7 @@ package services
 	import org.robotlegs.starling.mvcs.Actor;
 
 	import starling.events.Event;
+	import flash.utils.IDataInput;
 
 	public class AcquireProductService extends Actor implements IAcquireProductService
 	{
@@ -216,6 +217,7 @@ package services
 			}
 			if(this._process)
 			{
+				this._process.removeEventListener(NativeProcessExitEvent.EXIT, decompress_completeHandler);
 				this._process.closeInput();
 				this._process.exit(true);
 				this._process = null;
@@ -243,7 +245,7 @@ package services
 		{
 			var executable:File = new File("C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe");
 			var startupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			var arguments:Vector.<String> = new Vector.<String>();
+            var arguments:Vector.<String> = new <String>["-NoProfile"];
 			
 			var command:String = "& {";
 			command += "Param([string]$zipPath,[string]$outPath)"
@@ -265,14 +267,6 @@ package services
 			command += "\"";
 			arguments.push("-Command");
 			arguments.push(command);
-			/*//with PowerShell 5, the command is much simpler,
-			//but we need support for older versions of Windows
-			arguments.push("Expand-Archive");
-			arguments.push("-Path");
-			arguments.push(source.nativePath);
-			arguments.push("-DestinationPath");
-			arguments.push(this._destinationDirectory.nativePath);
-			arguments.push("-Force");*/
 			
 			startupInfo.executable = executable;
 			startupInfo.arguments = arguments;
@@ -314,7 +308,7 @@ package services
 		
 		private function decompress_completeHandler(event:NativeProcessExitEvent):void
 		{
-			if(!this._destinationDirectory.exists || !this._destinationDirectory.isDirectory)
+			if(!this._destinationDirectory || !this._destinationDirectory.exists || !this._destinationDirectory.isDirectory)
 			{
 				this.cleanup();
 				this.sdkManagerModel.log(BINARY_DISTRIBUTION_NOT_FOUND_ERROR);
@@ -346,6 +340,10 @@ package services
 		
 		private function decompress_errorHandler(event:flash.events.Event):void
 		{
+			var output:IDataInput = this._process.standardError;
+			var data:String = output.readUTFBytes(output.bytesAvailable);
+			this.sdkManagerModel.log(data);
+
 			this.cleanup();
 			this.sdkManagerModel.log(DECOMPRESS_ERROR);
 			this.dispatchWith(AcquireProductServiceEventType.ERROR, false, DECOMPRESS_ERROR);
