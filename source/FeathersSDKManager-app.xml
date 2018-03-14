@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<application xmlns="http://ns.adobe.com/air/application/28.0">
+<application xmlns="http://ns.adobe.com/air/application/29.0">
 	<id>com.feathersui.FeathersSDKManager</id>
 	<filename>Feathers SDK Manager</filename>
 	<name>Feathers SDK Manager</name>
-	<versionNumber>1.2.2</versionNumber>
+	<versionNumber>1.2.3</versionNumber>
 	<description>Downloads and manages the Feathers SDK and its dependencies.</description>
 	<copyright>2018 Bowler Hat LLC</copyright>
 
