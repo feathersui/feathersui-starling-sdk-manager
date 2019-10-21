@@ -7,6 +7,28 @@
 	<property file="./sdk.properties"/>
 	<property file="./build.local.properties"/>
 	<property file="./build.properties"/>
+	<loadfile srcFile="${source.root}/FeathersSDKManager-app.xml" property="version">
+		<filterchain>
+			<linecontains>
+				<contains value="&lt;versionNumber&gt;"/>
+			</linecontains>
+			<striplinebreaks/>
+			<trim/>
+			<replacestring from="&lt;versionNumber&gt;" to=""/>
+			<replacestring from="&lt;/versionNumber&gt;" to=""/>
+		</filterchain>
+	</loadfile>
+	<loadfile srcFile="${source.root}/FeathersSDKManager-app.xml" property="appid">
+		<filterchain>
+			<linecontains>
+				<contains value="&lt;id&gt;"/>
+			</linecontains>
+			<striplinebreaks/>
+			<trim/>
+			<replacestring from="&lt;id&gt;" to=""/>
+			<replacestring from="&lt;/id&gt;" to=""/>
+		</filterchain>
+	</loadfile>
 
 	<condition property="is.mac" value="true">
 		<os family="mac" />
@@ -50,17 +72,6 @@
 
 	<target name="-prepare">
 		<delete dir="${output.path}"/>
-		<loadfile srcFile="${source.root}/FeathersSDKManager-app.xml" property="version">
-			<filterchain>
-				<linecontains>
-					<contains value="&lt;versionNumber&gt;"/>
-				</linecontains>
-				<striplinebreaks/>
-				<trim/>
-				<replacestring from="&lt;versionNumber&gt;" to=""/>
-				<replacestring from="&lt;/versionNumber&gt;" to=""/>
-			</filterchain>
-		</loadfile>
 	</target>
 
 	<target name="-build-swf" depends="-prepare">
@@ -217,5 +228,59 @@
 				<exclude name="FeathersSDKManagerInstaller-${version}.exe"/>
 			</fileset>
 		</delete>
+	</target>
+	<target name="notarize-mac">
+		<fail message="Must define mac.notarize.username in build.local.properties to notarize macOS application">
+			<condition>
+				<and>
+					<os family="mac" />
+					<not>
+						<isset property="mac.notarize.username"/>
+					</not>
+				</and>
+			</condition>
+		</fail>
+		<fail message="Must define mac.notarize.password in build.local.properties to notarize macOS application">
+			<condition>
+				<and>
+					<os family="mac" />
+					<not>
+						<isset property="mac.notarize.password"/>
+					</not>
+				</and>
+			</condition>
+		</fail>
+		<exec executable="${mac.xcrun}" failonerror="true">
+			<arg value="altool"/>
+			<arg value="--notarize-app"/>
+			<arg value="--primary-bundle-id"/>
+			<arg value="${appid}"/>
+			<arg value="--username"/>
+			<arg value="${mac.notarize.username}"/>
+			<arg value="--password"/>
+			<arg value="${mac.notarize.password}"/>
+			<arg value="--file"/>
+			<arg value="${output.path}/FeathersSDKManagerInstaller-${version}.pkg"/>
+		</exec>
+	</target>
+
+	<target name="notarize-mac-status">
+		<exec executable="${mac.xcrun}" failonerror="true">
+			<arg value="altool"/>
+			<arg value="--notarization-history"/>
+			<arg value="0"/>
+			<arg value="--username"/>
+			<arg value="${mac.notarize.username}"/>
+			<arg value="--password"/>
+			<arg value="${mac.notarize.password}"/>
+		</exec>
+	</target>
+
+	<target name="notarize-mac-staple">
+		<exec executable="${mac.xcrun}" failonerror="true">
+			<arg value="stapler"/>
+			<arg value="staple"/>
+			<arg value="${output.path}/FeathersSDKManagerInstaller-${version}.pkg"/>
+		</exec>
 	</target>
 </project>
